@@ -14,9 +14,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	IEnumerator Start ()
 	{
-		string url = "http://api.shapeways.com/price/v1";
+		string priceUrl = "http://api.shapeways.com/price/v1";
 		string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
-		
 		string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 
 		Dictionary<string, string> dimensions = new Dictionary<string, string>();
@@ -29,18 +28,17 @@ public class ShapewaysConnection : MonoBehaviour {
 		dimensions.Add("yBoundMin","0");
 		dimensions.Add("zBoundMin","0");
 		
-		
-		var request = new HTTP.Request("POST", url, GetBytes("{\"volume\": 0.000001, \"area\": 0.0006, \"xBoundMax\": 0.01, \"yBoundMax\": 0.01, \"zBoundMax\": 0.01, \"xBoundMin\": 0, \"yBoundMin\": 0, \"zBoundMin\": 0 }"));
+		var request = new HTTP.Request("POST", priceUrl, GetBytes("{\"volume\": 0.000001, \"area\": 0.0006, \"xBoundMax\": 0.01, \"yBoundMax\": 0.01, \"zBoundMax\": 0.01, \"xBoundMin\": 0, \"yBoundMin\": 0, \"zBoundMin\": 0 }"));
 		
 		Dictionary<string, string> parameters = new Dictionary<string, string>();
 		parameters.Add("oauth_consumer_key", consumerKey);
-		parameters.Add("oauth_nonce", GenerateNonce());
+		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
 		parameters.Add("oauth_signature_method", "HMAC-SHA1");
-		parameters.Add("oauth_timestamp", GenerateTimeStamp());
+		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
 		parameters.Add("oauth_token", accessToken);
 		parameters.Add("oauth_version", "1.0");
 		
-		string oauth_signature = generateSignature(url, generateUrlParams(parameters));	
+		string oauth_signature = generateSignature(priceUrl, generateUrlParams(parameters));	
 		
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
@@ -64,17 +62,6 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Update () {
 	
 	}
-	
-    public virtual string GenerateNonce() {
-        // Just a simple implementation of a random number between 123400 and 9999999
-        return UnityEngine.Random.Range(123400, 9999999).ToString();            
-    }
-	
-    public virtual string GenerateTimeStamp() {
-        // Default implementation of UNIX time of the current UTC time
-        TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-        return Convert.ToInt64(ts.TotalSeconds).ToString();            
-    }
 	
 	string generateSignature(string url, string urlParams){
 		string signingKey = consumerKeySecret+"&"+accessTokenSecret;
