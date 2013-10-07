@@ -48,7 +48,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		if(request.exception != null) 
 		    Debug.LogError(request.exception);
 		else {
-		    HTTP.Request response = request.response;
+		    HTTP.Response response = request.response;
 		    Debug.Log(response.Text);
 		}
 	}
