@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 public class ShapewaysConnection : MonoBehaviour {
 	
@@ -10,8 +12,9 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 	private string priceUrl = "http://api.shapeways.com/price/v1";
 	private string materialsUrl = "http://api.shapeways.com/materials/v1";
+	private string modelUrl = "http://api.shapeways.com/models/v1";
 	
-	public GameObject cube;
+	public GameObject ring;
 	public GUIText materialID;
 	public GUIText priceMaterial;
 	public GUIText currency;
@@ -55,38 +58,65 @@ public class ShapewaysConnection : MonoBehaviour {
 			
 			Debug.Log(materialsResponse.Text);
 			
-		    IDictionary parsedJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
-			IDictionary prices = (IDictionary)parsedJson["prices"];
+		    IDictionary pricesJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
+			IDictionary prices = (IDictionary)pricesJson["prices"];
 
-		    IDictionary materialsParsedJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
-			IDictionary materials = (IDictionary)materialsParsedJson["materials"];
+		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
+			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
-			foreach(IDictionary price in prices.Values){
-				IDictionary material = (IDictionary)materials[price["materialId"]];
-				
-				quotePrice.gameObject.SetActive(false);
-				materialID.text = material["title"].ToString();
-				priceMaterial.text = price["price"].ToString();
-				currency.text = price["currency"].ToString();
-				setTexture(material["swatch"].ToString());
-				
+//			foreach(IDictionary price in prices.Values){
+//				IDictionary material = (IDictionary)materials[price["materialId"]];
+//				
+//				quotePrice.gameObject.SetActive(false);
+//				materialID.text = material["title"].ToString();
+//				priceMaterial.text = price["price"].ToString();
+//				currency.text = price["currency"].ToString();
+//				
+//				//Texture request
+//				HTTP.Request textureRequest = new HTTP.Request("GET", material["swatch"].ToString());
+//				textureRequest.Send();
+//				while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
+//				
+//				if (textureRequest.exception != null) {
+//					Debug.LogError (textureRequest.exception);
+//				} else {
+//					Texture2D tex = new Texture2D (512, 512);
+//					tex.LoadImage (textureRequest.response.Bytes);
+//					ring.renderer.material.SetTexture ("_MainTex", tex);
+//					//yield return new WaitForSeconds(1);
+//				}
+//				
+//			}
+			
+			StreamReader file = File.OpenText("Assets/Models/ring.stl");
+			string s = file.ReadToEnd();
+			byte[] encbuff = System.Text.Encoding.UTF8.GetBytes(s);
+			string enc = Convert.ToBase64String(encbuff);
+			string urlenc = WWW.EscapeURL(enc);
+			
+			Dictionary<string, string> modelParams = new Dictionary<string, string>();
+			modelParams.Add("file",urlenc);
+			modelParams.Add("fileName","ring.stl");
+			modelParams.Add("hasRightsToModel","true");
+			modelParams.Add("acceptTermsAndConditions","true");
+			modelParams.Add("uploadScale","1.0");
+			
+			string modelData = MiniJSON.Json.Serialize(modelParams);
+			
+			//Model request
+			HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
+			Dictionary<string,string> modelParameters = generateOAuthParams();
+			addHeaders(modelRequest, modelParameters, modelUrl);
+			modelRequest.Send();		
+			
+			while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
+			
+			if (modelRequest.exception != null) {
+				Debug.LogError (modelRequest.exception);
+			} else {
+				Debug.Log(modelRequest.response.Text);
 			}
-		}
-	}
-	
-	IEnumerator setTexture(string textureUrl){
-		//Texture request
-		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
-		textureRequest.Send();
-		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
-		
-		if (textureRequest.exception != null) {
-			Debug.LogError (textureRequest.exception);
-		} else {
-			Texture2D tex = new Texture2D (512, 512);
-			tex.LoadImage (textureRequest.response.Bytes);
-			cube.renderer.material.SetTexture ("_MainTex", tex);
-			yield return new WaitForSeconds(1);
+			
 		}
 	}
 	
