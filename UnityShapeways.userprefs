@@ -1,9 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-<<<<<<< HEAD
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/ObjectController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Hud.cs">
     <Files>
-      <File FileName="Assets/Scripts/ObjectController.cs" Line="12" Column="3" />
+      <File FileName="Assets/Scripts/ObjectController.cs" Line="7" Column="25" />
+      <File FileName="Assets/Scripts/Hud.cs" Line="6" Column="1" />
+      <File FileName="Assets/Scripts/ShapewaysConnection.cs" Line="77" Column="6" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -11,7 +12,7 @@
           <Node name="Assembly-CSharp" expanded="True">
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
-                <Node name="ObjectController.cs" selected="True" />
+                <Node name="Hud.cs" selected="True" />
               </Node>
             </Node>
           </Node>
@@ -22,9 +23,6 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-=======
-  <MonoDevelop.Ide.Workbench />
->>>>>>> ada88ea3f00d1eacef1cb45ea1fa11f55b37272d
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

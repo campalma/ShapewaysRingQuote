@@ -12,8 +12,31 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	protected string unreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
 	
-	IEnumerator Start ()
+	public static ShapewaysConnection m_instance;
+	
+	public static ShapewaysConnection Instance{
+		
+		get
+		{
+			if (m_instance == null)
+         	{
+            	m_instance = new ShapewaysConnection();
+         	}
+			
+			return m_instance;
+		}
+	}
+	
+	void Awake(){
+		
+		if(m_instance != null) throw new Exception();
+		m_instance = this;
+		
+	}
+	
+	public IEnumerator Start ()
 	{
+		
 		string url = "http://api.shapeways.com/price/v1";
 		string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
 		
@@ -60,10 +83,18 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
+	
 	// Update is called once per frame
 	void Update () {
 	
 	}
+	
+	public void MessageReturn(){
+		
+		Debug.Log("MESSAGE RETURN");
+	}
+	
+	
 	
     public virtual string GenerateNonce() {
         // Just a simple implementation of a random number between 123400 and 9999999
