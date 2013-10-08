@@ -1,5 +1,6 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+<<<<<<< HEAD
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Hud.cs">
     <Files>
       <File FileName="Assets/Scripts/ObjectController.cs" Line="7" Column="25" />
@@ -23,6 +24,9 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+=======
+  <MonoDevelop.Ide.Workbench />
+>>>>>>> 2fd0312f3b136ad1ccb0654d0f1747542d1a5b04
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

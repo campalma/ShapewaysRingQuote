@@ -1,16 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Text;
-using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 
 public class ShapewaysConnection : MonoBehaviour {
 	
 	public string consumerKeySecret = "0b03d1f56ce2a508c4e4c7ce782053a83ba2d9fd";
 	public string accessTokenSecret = "e318690113a78d21dae51ea450e53937db2b11b3";
-	
-	protected string unreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
+	public string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
+	public string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 	
 	public static ShapewaysConnection m_instance;
 	
@@ -36,11 +33,15 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	public IEnumerator Start ()
 	{
+<<<<<<< HEAD
 		
 		string url = "http://api.shapeways.com/price/v1";
 		string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
 		
 		string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
+=======
+		string priceUrl = "http://api.shapeways.com/price/v1";
+>>>>>>> 2fd0312f3b136ad1ccb0654d0f1747542d1a5b04
 
 		Dictionary<string, string> dimensions = new Dictionary<string, string>();
 		dimensions.Add("volume","0.000001");
@@ -52,18 +53,19 @@ public class ShapewaysConnection : MonoBehaviour {
 		dimensions.Add("yBoundMin","0");
 		dimensions.Add("zBoundMin","0");
 		
+		string data = MiniJSON.Json.Serialize(dimensions);
 		
-		var request = new HTTP.Request("POST", url, GetBytes("{\"volume\": 0.000001, \"area\": 0.0006, \"xBoundMax\": 0.01, \"yBoundMax\": 0.01, \"zBoundMax\": 0.01, \"xBoundMin\": 0, \"yBoundMin\": 0, \"zBoundMin\": 0 }"));
+		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
 		
 		Dictionary<string, string> parameters = new Dictionary<string, string>();
 		parameters.Add("oauth_consumer_key", consumerKey);
-		parameters.Add("oauth_nonce", GenerateNonce());
+		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
 		parameters.Add("oauth_signature_method", "HMAC-SHA1");
-		parameters.Add("oauth_timestamp", GenerateTimeStamp());
+		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
 		parameters.Add("oauth_token", accessToken);
 		parameters.Add("oauth_version", "1.0");
 		
-		string oauth_signature = generateSignature(url, generateUrlParams(parameters));	
+		string oauth_signature = OAuth.generateSignature(priceUrl, parameters, consumerKeySecret, accessTokenSecret);	
 		
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
@@ -76,9 +78,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		if(request.exception != null) 
 		    Debug.LogError(request.exception);
 		else {
-		    var response = request.response;
-		    Debug.Log(response.status);
-		    Debug.Log(response.GetHeader("Content-Type"));
+		    HTTP.Response response = request.response;
 		    Debug.Log(response.Text);
 		}
 	}
@@ -88,6 +88,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Update () {
 	
 	}
+<<<<<<< HEAD
 	
 	public void MessageReturn(){
 		
@@ -156,4 +157,6 @@ public class ShapewaysConnection : MonoBehaviour {
 	{
 		return Convert.ToBase64String(input);
 	}
+=======
+>>>>>>> 2fd0312f3b136ad1ccb0654d0f1747542d1a5b04
 }
