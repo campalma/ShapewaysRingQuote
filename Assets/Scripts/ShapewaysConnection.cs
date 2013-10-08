@@ -4,10 +4,10 @@ using System.Collections.Generic;
 
 public class ShapewaysConnection : MonoBehaviour {
 	
-	public string consumerKeySecret = "0b03d1f56ce2a508c4e4c7ce782053a83ba2d9fd";
-	public string accessTokenSecret = "e318690113a78d21dae51ea450e53937db2b11b3";
-	public string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
-	public string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
+	private string consumerKeySecret = "0b03d1f56ce2a508c4e4c7ce782053a83ba2d9fd";
+	private string accessTokenSecret = "e318690113a78d21dae51ea450e53937db2b11b3";
+	private string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
+	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 	
 	IEnumerator Start ()
 	{
