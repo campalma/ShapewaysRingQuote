@@ -49,7 +49,14 @@ public class ShapewaysConnection : MonoBehaviour {
 		    Debug.LogError(request.exception);
 		else {
 		    HTTP.Response response = request.response;
-		    Debug.Log(response.Text);
+		    IDictionary parsedJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
+			IDictionary prices = (IDictionary)parsedJson["prices"];
+			Debug.Log(response.Text);
+			foreach(IDictionary price in prices.Values){
+				Debug.Log(price["materialId"]);
+				Debug.Log(price["price"]);
+				Debug.Log(price["currency"]);
+			}
 		}
 	}
 	
