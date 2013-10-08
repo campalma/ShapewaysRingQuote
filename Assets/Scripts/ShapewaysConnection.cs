@@ -9,6 +9,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
 	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 	
+	public GameObject cube;
 	public GUIText materialID;
 	public GUIText priceMaterial;
 	public GUIText currency;
@@ -67,12 +68,25 @@ public class ShapewaysConnection : MonoBehaviour {
 			
 			foreach(IDictionary price in prices.Values){
 				IDictionary material = (IDictionary)materials[price["materialId"]];
-
 				
 				quotePrice.gameObject.SetActive(false);
 				materialID.text = material["title"].ToString();
 				priceMaterial.text = price["price"].ToString();
 				currency.text = price["currency"].ToString();
+				
+				//Texture request
+				HTTP.Request textureRequest = new HTTP.Request("GET", material["swatch"].ToString());
+				textureRequest.Send();
+				while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
+				
+				if (textureRequest.exception != null) {
+					Debug.LogError (textureRequest.exception);
+				} else {
+					Texture2D tex = new Texture2D (512, 512);
+					tex.LoadImage (textureRequest.response.Bytes);
+					cube.renderer.material.SetTexture ("_MainTex", tex);
+					yield return new WaitForSeconds(1);
+				}
 				
 			}
 		}
