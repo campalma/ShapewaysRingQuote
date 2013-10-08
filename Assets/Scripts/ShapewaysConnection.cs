@@ -12,6 +12,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	IEnumerator Start ()
 	{
 		string priceUrl = "http://api.shapeways.com/price/v1";
+		string materialsUrl = "http://api.shapeways.com/materials/v1";
 
 		Dictionary<string, string> dimensions = new Dictionary<string, string>();
 		dimensions.Add("volume","0.000001");
@@ -35,12 +36,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		parameters.Add("oauth_token", accessToken);
 		parameters.Add("oauth_version", "1.0");
 		
-		string oauth_signature = OAuth.generateSignature(priceUrl, parameters, consumerKeySecret, accessTokenSecret);	
-		
-		request.SetHeader("Accept", "application/json");
-		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
-		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+parameters["oauth_nonce"]+"\", oauth_timestamp=\""+parameters["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
-		
+		addHeaders(request, parameters, priceUrl);
 		request.Send();
 		
 		while(!request.isDone) yield return new WaitForEndOfFrame();
@@ -63,5 +59,12 @@ public class ShapewaysConnection : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
+	}
+	
+	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
+		string oauth_signature = OAuth.generateSignature(url, oauthParams, consumerKeySecret, accessTokenSecret);	
+		request.SetHeader("Accept", "application/json");
+		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
+		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
 	}
 }
