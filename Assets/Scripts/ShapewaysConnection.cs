@@ -64,69 +64,75 @@ public class ShapewaysConnection : MonoBehaviour {
 		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
 			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
-//			foreach(IDictionary price in prices.Values){
-//				IDictionary material = (IDictionary)materials[price["materialId"]];
-//				
-//				quotePrice.gameObject.SetActive(false);
-//				materialID.text = material["title"].ToString();
-//				priceMaterial.text = price["price"].ToString();
-//				currency.text = price["currency"].ToString();
-//				
-//				//Texture request
-//				HTTP.Request textureRequest = new HTTP.Request("GET", material["swatch"].ToString());
-//				textureRequest.Send();
-//				while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
-//				
-//				if (textureRequest.exception != null) {
-//					Debug.LogError (textureRequest.exception);
-//				} else {
-//					Texture2D tex = new Texture2D (512, 512);
-//					tex.LoadImage (textureRequest.response.Bytes);
-//					ring.renderer.material.SetTexture ("_MainTex", tex);
-//					//yield return new WaitForSeconds(1);
-//				}
-//				
-//			}
-			
-		    FileStream fs = new FileStream("Assets/Models/ring.stl", 
-		                                   FileMode.Open, 
-		                                   FileAccess.Read);
-		    byte[] filebytes = new byte[fs.Length];
-		    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
-		    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
-		    string enc = encodedData; 
-			
-			string urlenc = WWW.EscapeURL(enc);
-			
-			Dictionary<string, string> modelParams = new Dictionary<string, string>();
-			modelParams.Add("file",urlenc);
-			modelParams.Add("fileName","ring2.stl");
-			modelParams.Add("hasRightsToModel","1");
-			modelParams.Add("acceptTermsAndConditions","1");
-			//modelParams.Add("uploadScale","0.01");
-			
-			string modelData = MiniJSON.Json.Serialize(modelParams);
-			
-			//Model request
-			HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
-			Dictionary<string,string> modelParameters = generateOAuthParams();
-			addHeaders(modelRequest, modelParameters, modelUrl);
-			modelRequest.Send();		
-			
-			while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
-			
-			if (modelRequest.exception != null) {
-				Debug.LogError (modelRequest.exception);
-			} else {
-				Debug.Log(modelRequest.response.Text);
+			foreach(IDictionary price in prices.Values){
+				IDictionary material = (IDictionary)materials[price["materialId"]];
+				
+				quotePrice.gameObject.SetActive(false);
+				materialID.text = material["title"].ToString();
+				priceMaterial.text = price["price"].ToString();
+				currency.text = price["currency"].ToString();
+				
+				yield return setTexture(material["swatch"].ToString());
 			}
 			
+			//yield return StartCoroutine("uploadFile");
 		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
+	}
+	
+	IEnumerator setTexture(string textureUrl){
+		//Texture request
+		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
+		textureRequest.Send();
+		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (textureRequest.exception != null) {
+			Debug.LogError (textureRequest.exception);
+		} 
+		else{
+			Texture2D tex = new Texture2D (512, 512);
+			tex.LoadImage (textureRequest.response.Bytes);
+			ring.renderer.material.SetTexture ("_MainTex", tex);
+			yield return new WaitForSeconds(1);
+		}
+
+	}
+	
+	IEnumerator uploadFile(){
+	    FileStream fs = new FileStream("Assets/Models/ring.stl", 
+	                                   FileMode.Open, 
+	                                   FileAccess.Read);
+	    byte[] filebytes = new byte[fs.Length];
+	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
+	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
+	    string enc = encodedData; 
+		string urlenc = WWW.EscapeURL(enc);
+		
+		Dictionary<string, string> modelParams = new Dictionary<string, string>();
+		modelParams.Add("file",urlenc);
+		modelParams.Add("fileName","ring2.stl");
+		modelParams.Add("hasRightsToModel","1");
+		modelParams.Add("acceptTermsAndConditions","1");
+		
+		string modelData = MiniJSON.Json.Serialize(modelParams);
+		
+		//Model request
+		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
+		Dictionary<string,string> modelParameters = generateOAuthParams();
+		addHeaders(modelRequest, modelParameters, modelUrl);
+		modelRequest.Send();		
+		
+		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (modelRequest.exception != null) {
+			Debug.LogError (modelRequest.exception);
+		} else {
+			Debug.Log(modelRequest.response.Text);
+		}
 	}
 	
 	Dictionary<string, string> generateOAuthParams(){
