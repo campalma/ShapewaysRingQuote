@@ -68,22 +68,25 @@ public class ShapewaysConnection : MonoBehaviour {
 				materialID.text = material["title"].ToString();
 				priceMaterial.text = price["price"].ToString();
 				currency.text = price["currency"].ToString();
-				
-				//Texture request
-				HTTP.Request textureRequest = new HTTP.Request("GET", material["swatch"].ToString());
-				textureRequest.Send();
-				while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
-				
-				if (textureRequest.exception != null) {
-					Debug.LogError (textureRequest.exception);
-				} else {
-					Texture2D tex = new Texture2D (512, 512);
-					tex.LoadImage (textureRequest.response.Bytes);
-					cube.renderer.material.SetTexture ("_MainTex", tex);
-					yield return new WaitForSeconds(1);
-				}
+				setTexture(material["swatch"].ToString());
 				
 			}
+		}
+	}
+	
+	IEnumerator setTexture(string textureUrl){
+		//Texture request
+		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
+		textureRequest.Send();
+		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (textureRequest.exception != null) {
+			Debug.LogError (textureRequest.exception);
+		} else {
+			Texture2D tex = new Texture2D (512, 512);
+			tex.LoadImage (textureRequest.response.Bytes);
+			cube.renderer.material.SetTexture ("_MainTex", tex);
+			yield return new WaitForSeconds(1);
 		}
 	}
 	
