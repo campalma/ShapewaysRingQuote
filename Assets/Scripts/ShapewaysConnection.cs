@@ -88,7 +88,7 @@ public class ShapewaysConnection : MonoBehaviour {
 //				
 //			}
 			
-		    FileStream fs = new FileStream("Assets/Models/cube.stl", 
+		    FileStream fs = new FileStream("Assets/Models/ring.stl", 
 		                                   FileMode.Open, 
 		                                   FileAccess.Read);
 		    byte[] filebytes = new byte[fs.Length];
@@ -100,10 +100,10 @@ public class ShapewaysConnection : MonoBehaviour {
 			
 			Dictionary<string, string> modelParams = new Dictionary<string, string>();
 			modelParams.Add("file",urlenc);
-			modelParams.Add("fileName","asdf.stl");
+			modelParams.Add("fileName","ring2.stl");
 			modelParams.Add("hasRightsToModel","1");
 			modelParams.Add("acceptTermsAndConditions","1");
-			modelParams.Add("uploadScale","1");
+			//modelParams.Add("uploadScale","0.01");
 			
 			string modelData = MiniJSON.Json.Serialize(modelParams);
 			
