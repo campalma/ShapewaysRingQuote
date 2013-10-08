@@ -3,27 +3,28 @@ using System.Collections;
 
 public class ObjectController : MonoBehaviour {
 	
+	public float speed = 1.0f;
+	
 	private Vector3 screenPoint;
 	private Vector3 offset;
 	
 	void OnMouseDown()
 	{
-		Debug.Log("entro OnMouseDown()");
 			
     	screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
  
     	offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
  
 	}
- 
- 
+	
 	void OnMouseDrag()
 	{
-		Debug.Log("entro OnMouseDrag()");
-    	Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
- 
-    	Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
-    	transform.position = curPosition;
+		
+		Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+		
+		transform.Rotate(curScreenPoint * Time.deltaTime * speed);
+		
+
 	}
 	
 }
