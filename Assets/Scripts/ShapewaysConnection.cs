@@ -8,6 +8,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string accessTokenSecret = "e318690113a78d21dae51ea450e53937db2b11b3";
 	private string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
 	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
+	private string priceUrl = "http://api.shapeways.com/price/v1";
+	private string materialsUrl = "http://api.shapeways.com/materials/v1";
 	
 	public GameObject cube;
 	public GUIText materialID;
@@ -15,13 +17,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GUIText currency;
 	public GUIText quotePrice;
 	
-	IEnumerator Start ()
-	{
-		Debug.Log("Start");
+	IEnumerator Start (){
 		
-		string priceUrl = "http://api.shapeways.com/price/v1";
-		string materialsUrl = "http://api.shapeways.com/materials/v1";
-
 		Dictionary<string, string> dimensions = new Dictionary<string, string>();
 		dimensions.Add("volume","0.000001");
 		dimensions.Add("area","0.0006");
@@ -33,8 +30,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		dimensions.Add("zBoundMin","0");
 		
 		string data = MiniJSON.Json.Serialize(dimensions);
-		
-		Debug.Log("Before requests");	
 		
 		//Prices request
 		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
