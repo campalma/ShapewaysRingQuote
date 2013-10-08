@@ -17,11 +17,11 @@ public class OAuth{
         return Convert.ToInt64(ts.TotalSeconds).ToString();            
     }
 	
-	public static string generateSignature(string url, Dictionary<string, string> parameters, string consumerKeySecret, string accessTokenSecret){
+	public static string generateSignature(string url, string method, Dictionary<string, string> parameters, string consumerKeySecret, string accessTokenSecret){
 		string urlParams = generateUrlParams(parameters);
 		string signingKey = consumerKeySecret+"&"+accessTokenSecret;
 		
-		string result = "POST&"+urlEncode(url)+"&";
+		string result = method+"&"+urlEncode(url)+"&";
 		KeyedHashAlgorithm hmac = new HMACSHA1 (GetBytes (signingKey));
 		result = ToBase64 (hmac.ComputeHash (GetBytes (result+urlEncode(urlParams))));
 		return result;

@@ -11,6 +11,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	IEnumerator Start ()
 	{
+		Debug.Log("Start");
+		
 		string priceUrl = "http://api.shapeways.com/price/v1";
 		string materialsUrl = "http://api.shapeways.com/materials/v1";
 
@@ -26,24 +28,41 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		string data = MiniJSON.Json.Serialize(dimensions);
 		
+		Debug.Log("Before requests");	
+		
+		//Prices request
 		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
-		
 		Dictionary<string,string> parameters = generateOAuthParams();
-		
 		addHeaders(request, parameters, priceUrl);
 		request.Send();
 		
-		while(!request.isDone) yield return new WaitForEndOfFrame();
+		//Materials request
+		HTTP.Request materialsRequest = new HTTP.Request("GET", materialsUrl);
+		Dictionary<string,string> materialsParameters = generateOAuthParams();
+		addHeaders(materialsRequest, materialsParameters, materialsUrl);
+		materialsRequest.Send();
 		
-		if(request.exception != null) 
+		while(!request.isDone || !materialsRequest.isDone) yield return new WaitForSeconds (1);
+		
+		if(request.exception != null || materialsRequest.exception != null){
 		    Debug.LogError(request.exception);
+			Debug.LogError(materialsRequest.exception);
+		}
 		else {
 		    HTTP.Response response = request.response;
+			HTTP.Response materialsResponse = materialsRequest.response;
+			
+			Debug.Log(materialsResponse.Text);
+			
 		    IDictionary parsedJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
 			IDictionary prices = (IDictionary)parsedJson["prices"];
-			Debug.Log(response.Text);
+
+		    IDictionary materialsParsedJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
+			IDictionary materials = (IDictionary)materialsParsedJson["materials"];
+			
 			foreach(IDictionary price in prices.Values){
-				Debug.Log(price["materialId"]);
+				IDictionary material = (IDictionary)materials[price["materialId"]];
+				Debug.Log(material["title"]);
 				Debug.Log(price["price"]);
 				Debug.Log(price["currency"]);
 			}
@@ -67,7 +86,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
-		string oauth_signature = OAuth.generateSignature(url, oauthParams, consumerKeySecret, accessTokenSecret);	
+		string oauth_signature = OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret);	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
 		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
