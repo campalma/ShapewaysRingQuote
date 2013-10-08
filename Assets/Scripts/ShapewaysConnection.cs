@@ -88,18 +88,22 @@ public class ShapewaysConnection : MonoBehaviour {
 //				
 //			}
 			
-			StreamReader file = File.OpenText("Assets/Models/ring.stl");
-			string s = file.ReadToEnd();
-			byte[] encbuff = System.Text.Encoding.UTF8.GetBytes(s);
-			string enc = Convert.ToBase64String(encbuff);
+		    FileStream fs = new FileStream("Assets/Models/cube.stl", 
+		                                   FileMode.Open, 
+		                                   FileAccess.Read);
+		    byte[] filebytes = new byte[fs.Length];
+		    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
+		    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
+		    string enc = encodedData; 
+			
 			string urlenc = WWW.EscapeURL(enc);
 			
 			Dictionary<string, string> modelParams = new Dictionary<string, string>();
 			modelParams.Add("file",urlenc);
-			modelParams.Add("fileName","ring.stl");
-			modelParams.Add("hasRightsToModel","true");
-			modelParams.Add("acceptTermsAndConditions","true");
-			modelParams.Add("uploadScale","1.0");
+			modelParams.Add("fileName","asdf.stl");
+			modelParams.Add("hasRightsToModel","1");
+			modelParams.Add("acceptTermsAndConditions","1");
+			modelParams.Add("uploadScale","1");
 			
 			string modelData = MiniJSON.Json.Serialize(modelParams);
 			
