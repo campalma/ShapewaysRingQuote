@@ -10,6 +10,7 @@ public class Hud : MonoBehaviour {
     if (Input.GetKey ("mouse 0")) {
 
         //print ("Box Clicked!");
+		GameObject.Find("Ring").GetComponent<Animation>().Play();	
 		postRequest.SetActive(true);
     }
 

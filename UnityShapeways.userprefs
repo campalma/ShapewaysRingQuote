@@ -8,10 +8,9 @@
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
                 <Node name="UniWeb" expanded="True">
-                  <Node name="Plugins" expanded="True">
-                    <Node name="Request.cs" selected="True" />
-                  </Node>
+                  <Node name="Plugins" expanded="True" />
                 </Node>
+                <Node name="ShapewaysConnection.cs" selected="True" />
               </Node>
             </Node>
           </Node>
