@@ -28,13 +28,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
 		
-		Dictionary<string, string> parameters = new Dictionary<string, string>();
-		parameters.Add("oauth_consumer_key", consumerKey);
-		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
-		parameters.Add("oauth_signature_method", "HMAC-SHA1");
-		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
-		parameters.Add("oauth_token", accessToken);
-		parameters.Add("oauth_version", "1.0");
+		Dictionary<string,string> parameters = generateOAuthParams();
 		
 		addHeaders(request, parameters, priceUrl);
 		request.Send();
@@ -59,6 +53,17 @@ public class ShapewaysConnection : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
+	}
+	
+	Dictionary<string, string> generateOAuthParams(){
+		Dictionary<string, string> parameters = new Dictionary<string, string>();
+		parameters.Add("oauth_consumer_key", consumerKey);
+		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
+		parameters.Add("oauth_signature_method", "HMAC-SHA1");
+		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
+		parameters.Add("oauth_token", accessToken);
+		parameters.Add("oauth_version", "1.0");
+		return parameters;
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
