@@ -10,7 +10,6 @@ public class Hud : MonoBehaviour {
     if (Input.GetKey ("mouse 0")) {
 
         //print ("Box Clicked!");
-			
 		postRequest.SetActive(true);
     }
 

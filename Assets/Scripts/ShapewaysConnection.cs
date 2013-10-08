@@ -9,6 +9,11 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
 	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
 	
+	public GUIText materialID;
+	public GUIText priceMaterial;
+	public GUIText currency;
+	public GUIText quotePrice;
+	
 	IEnumerator Start ()
 	{
 		string priceUrl = "http://api.shapeways.com/price/v1";
@@ -49,6 +54,12 @@ public class ShapewaysConnection : MonoBehaviour {
 			IDictionary prices = (IDictionary)parsedJson["prices"];
 			Debug.Log(response.Text);
 			foreach(IDictionary price in prices.Values){
+				
+				quotePrice.gameObject.SetActive(false);
+				materialID.text = price["materialId"].ToString();
+				priceMaterial.text = price["price"].ToString();
+				currency.text = price["currency"].ToString();
+				
 				Debug.Log(price["materialId"]);
 				Debug.Log(price["price"]);
 				Debug.Log(price["currency"]);
