@@ -27,6 +27,17 @@ public class OAuth{
 		return result;
 	}
 	
+	public static Dictionary<string, string> generateParams(string consumerKey, string accessToken){
+		Dictionary<string, string> parameters = new Dictionary<string, string>();
+		parameters.Add("oauth_consumer_key", consumerKey);
+		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
+		parameters.Add("oauth_signature_method", "HMAC-SHA1");
+		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
+		parameters.Add("oauth_token", accessToken);
+		parameters.Add("oauth_version", "1.0");
+		return parameters;
+	}
+	
 	private static string generateUrlParams(Dictionary<string,string> parameters){
 		string urlParams = "";
 		

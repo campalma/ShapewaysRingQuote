@@ -36,13 +36,13 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		//Prices request
 		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
-		Dictionary<string,string> parameters = generateOAuthParams();
+		Dictionary<string,string> parameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(request, parameters, priceUrl);
 		request.Send();
 		
 		//Materials request
 		HTTP.Request materialsRequest = new HTTP.Request("GET", materialsUrl);
-		Dictionary<string,string> materialsParameters = generateOAuthParams();
+		Dictionary<string,string> materialsParameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(materialsRequest, materialsParameters, materialsUrl);
 		materialsRequest.Send();
 		
@@ -74,6 +74,7 @@ public class ShapewaysConnection : MonoBehaviour {
 				currency.text = price["currency"].ToString();
 				
 				yield return StartCoroutine(setTexture(material["swatch"].ToString()));
+				yield return new WaitForSeconds(1);
 			}
 			
 			//yield return StartCoroutine("uploadFile");
@@ -98,7 +99,6 @@ public class ShapewaysConnection : MonoBehaviour {
 			Texture2D tex = new Texture2D (512, 512);
 			tex.LoadImage (textureRequest.response.Bytes);
 			ring.renderer.material.SetTexture ("_MainTex", tex);
-			yield return new WaitForSeconds(1);
 		}
 
 	}
@@ -123,7 +123,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		//Model request
 		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
-		Dictionary<string,string> modelParameters = generateOAuthParams();
+		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(modelRequest, modelParameters, modelUrl);
 		modelRequest.Send();		
 		
@@ -134,17 +134,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		} else {
 			Debug.Log(modelRequest.response.Text);
 		}
-	}
-	
-	Dictionary<string, string> generateOAuthParams(){
-		Dictionary<string, string> parameters = new Dictionary<string, string>();
-		parameters.Add("oauth_consumer_key", consumerKey);
-		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
-		parameters.Add("oauth_signature_method", "HMAC-SHA1");
-		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
-		parameters.Add("oauth_token", accessToken);
-		parameters.Add("oauth_version", "1.0");
-		return parameters;
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
