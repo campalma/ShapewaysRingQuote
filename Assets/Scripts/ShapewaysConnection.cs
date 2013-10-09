@@ -65,6 +65,7 @@ public class ShapewaysConnection : MonoBehaviour {
 			
 			float i = 0f;
 			
+			
 			foreach(IDictionary price in prices.Values){
 				
 				GUIText cloneMaterial;
@@ -72,6 +73,7 @@ public class ShapewaysConnection : MonoBehaviour {
 				GUIText cloneCurrency;
 				GUIText cloneBuy;
 				
+								
 				IDictionary material = (IDictionary)materials[price["materialId"]];
 				
 				cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
@@ -85,7 +87,13 @@ public class ShapewaysConnection : MonoBehaviour {
 				clonePrice.text = price["price"].ToString();
 				cloneCurrency.text = price["currency"].ToString();
 				
+				cloneMaterial.transform.parent = this.transform;
+				clonePrice.transform.parent = this.transform; 
+				cloneCurrency.transform.parent = this.transform;  
+				cloneBuy.transform.parent = this.transform;
+				 
 
+				
 				i-=0.1f;
 
 				yield return StartCoroutine(setTexture(material["swatch"].ToString()));
@@ -117,35 +125,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
-	IEnumerator uploadFile(){
-	    FileStream fs = new FileStream("Assets/Models/ring.stl", FileMode.Open, FileAccess.Read);
-	    byte[] filebytes = new byte[fs.Length];
-	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
-	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
-	    string enc = encodedData; 
-		string urlenc = WWW.EscapeURL(enc);
-		
-		Dictionary<string, string> modelParams = new Dictionary<string, string>();
-		modelParams.Add("file",urlenc);
-		modelParams.Add("fileName","ring2.stl");
-		modelParams.Add("hasRightsToModel","1");
-		modelParams.Add("acceptTermsAndConditions","1");
-		
-		string modelData = MiniJSON.Json.Serialize(modelParams);
-		
-		//Model request
-		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
-		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
-		addHeaders(modelRequest, modelParameters, modelUrl);
-		modelRequest.Send();		
-		
-		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
-		
-		if (modelRequest.exception != null)
-			Debug.LogError (modelRequest.exception); 
-		else
-			Debug.Log(modelRequest.response.Text);
-	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
 		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret));	

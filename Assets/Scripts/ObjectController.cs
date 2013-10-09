@@ -8,6 +8,7 @@ public class ObjectController : MonoBehaviour {
 	private Vector3 screenPoint;
 	private Vector3 offset;
 	
+		
 	void OnMouseDown()
 	{
 			
