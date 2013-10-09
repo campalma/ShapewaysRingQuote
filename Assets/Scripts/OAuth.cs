@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine;
 public class OAuth{
 	
 	private static string unreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
@@ -25,6 +26,17 @@ public class OAuth{
 		KeyedHashAlgorithm hmac = new HMACSHA1 (GetBytes (signingKey));
 		result = ToBase64 (hmac.ComputeHash (GetBytes (result+urlEncode(urlParams))));
 		return result;
+	}
+	
+	public static Dictionary<string, string> generateParams(string consumerKey, string accessToken){
+		Dictionary<string, string> parameters = new Dictionary<string, string>();
+		parameters.Add("oauth_consumer_key", consumerKey);
+		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
+		parameters.Add("oauth_signature_method", "HMAC-SHA1");
+		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
+		parameters.Add("oauth_token", accessToken);
+		parameters.Add("oauth_version", "1.0");
+		return parameters;
 	}
 	
 	private static string generateUrlParams(Dictionary<string,string> parameters){

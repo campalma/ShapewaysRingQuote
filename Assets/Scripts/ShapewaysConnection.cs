@@ -15,6 +15,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string modelUrl = "http://api.shapeways.com/models/v1";
 	
 	public GameObject ring;
+	
+	public GUIText buy;
 	public GUIText nameMaterial;
 	public GUIText priceMaterial;
 	public GUIText currency;
@@ -36,13 +38,13 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		//Prices request
 		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
-		Dictionary<string,string> parameters = generateOAuthParams();
+		Dictionary<string,string> parameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(request, parameters, priceUrl);
 		request.Send();
 		
 		//Materials request
 		HTTP.Request materialsRequest = new HTTP.Request("GET", materialsUrl);
-		Dictionary<string,string> materialsParameters = generateOAuthParams();
+		Dictionary<string,string> materialsParameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(materialsRequest, materialsParameters, materialsUrl);
 		materialsRequest.Send();
 		
@@ -56,11 +58,8 @@ public class ShapewaysConnection : MonoBehaviour {
 		    HTTP.Response response = request.response;
 			HTTP.Response materialsResponse = materialsRequest.response;
 			
-			Debug.Log(materialsResponse.Text);
-			
 		    IDictionary pricesJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
 			IDictionary prices = (IDictionary)pricesJson["prices"];
-
 		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
 			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
@@ -69,18 +68,29 @@ public class ShapewaysConnection : MonoBehaviour {
 			foreach(IDictionary price in prices.Values){
 				
 				GUIText cloneMaterial;
+				GUIText clonePrice;
+				GUIText cloneCurrency;
+				GUIText cloneBuy;
 				
 				IDictionary material = (IDictionary)materials[price["materialId"]];
 				
 				cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
-					
-				quotePrice.gameObject.SetActive(false);
-				cloneMaterial.text = material["title"].ToString();
-				priceMaterial.text = price["price"].ToString();
-				currency.text = price["currency"].ToString();
+				clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
+				cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
+				cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
 				
+				quotePrice.gameObject.SetActive(false);
+				
+				cloneMaterial.text = material["title"].ToString();
+				clonePrice.text = price["price"].ToString();
+				cloneCurrency.text = price["currency"].ToString();
+				
+
 				i-=0.1f;
-				yield return setTexture(material["swatch"].ToString());
+
+				yield return StartCoroutine(setTexture(material["swatch"].ToString()));
+				//yield return new WaitForSeconds(1);
+
 			}
 			
 			//yield return StartCoroutine("uploadFile");
@@ -98,22 +108,17 @@ public class ShapewaysConnection : MonoBehaviour {
 		textureRequest.Send();
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (textureRequest.exception != null) {
+		if (textureRequest.exception != null)
 			Debug.LogError (textureRequest.exception);
-		} 
 		else{
 			Texture2D tex = new Texture2D (512, 512);
 			tex.LoadImage (textureRequest.response.Bytes);
 			ring.renderer.material.SetTexture ("_MainTex", tex);
-			yield return new WaitForSeconds(1);
 		}
-
 	}
 	
 	IEnumerator uploadFile(){
-	    FileStream fs = new FileStream("Assets/Models/ring.stl", 
-	                                   FileMode.Open, 
-	                                   FileAccess.Read);
+	    FileStream fs = new FileStream("Assets/Models/ring.stl", FileMode.Open, FileAccess.Read);
 	    byte[] filebytes = new byte[fs.Length];
 	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
 	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
@@ -130,32 +135,20 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		//Model request
 		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
-		Dictionary<string,string> modelParameters = generateOAuthParams();
+		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
 		addHeaders(modelRequest, modelParameters, modelUrl);
 		modelRequest.Send();		
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (modelRequest.exception != null) {
-			Debug.LogError (modelRequest.exception);
-		} else {
+		if (modelRequest.exception != null)
+			Debug.LogError (modelRequest.exception); 
+		else
 			Debug.Log(modelRequest.response.Text);
-		}
-	}
-	
-	Dictionary<string, string> generateOAuthParams(){
-		Dictionary<string, string> parameters = new Dictionary<string, string>();
-		parameters.Add("oauth_consumer_key", consumerKey);
-		parameters.Add("oauth_nonce", OAuth.GenerateNonce());
-		parameters.Add("oauth_signature_method", "HMAC-SHA1");
-		parameters.Add("oauth_timestamp", OAuth.GenerateTimeStamp());
-		parameters.Add("oauth_token", accessToken);
-		parameters.Add("oauth_version", "1.0");
-		return parameters;
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
-		string oauth_signature = OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret);	
+		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
 		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
