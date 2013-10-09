@@ -22,6 +22,27 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GUIText currency;
 	public GUIText quotePrice;
 	
+	private static ShapewaysConnection m_instance;
+	
+	public static ShapewaysConnection Instance
+	{
+		get
+		{
+			if(m_instance == null)
+			{
+				m_instance = new ShapewaysConnection();
+			}
+			
+			return m_instance;
+		}
+		
+	}
+	
+	void Awake()
+	{
+		m_instance = this;
+	}
+	
 	IEnumerator Start (){
 		
 		Dictionary<string, string> dimensions = new Dictionary<string, string>();
@@ -96,7 +117,7 @@ public class ShapewaysConnection : MonoBehaviour {
 				
 				i-=0.1f;
 
-				yield return StartCoroutine(setTexture(material["swatch"].ToString()));
+				//yield return StartCoroutine(setTexture(material["swatch"].ToString()));
 				//yield return new WaitForSeconds(1);
 
 			}
@@ -109,9 +130,11 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Update () {
 	
 	}
-	
-	IEnumerator setTexture(string textureUrl){
+
+		
+	public IEnumerator setTexture(string textureUrl){
 		//Texture request
+		Debug.Log("URL TEXTURE:"+textureUrl);
 		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
 		textureRequest.Send();
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();

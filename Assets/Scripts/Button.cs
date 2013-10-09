@@ -5,12 +5,24 @@ public class Button : MonoBehaviour {
 
 	public GameObject buyItem;
 	
-	void OnMouseDown () {
+	public bool buyObject = true;
+	public bool setTexture = false;
+	
+	IEnumerator OnMouseDown () {
 
 	    if (Input.GetKey ("mouse 0")) {
-
-			buyItem.SetActive(true);
+			
+			if(buyObject)
+				buyItem.SetActive(true);
+			else if(setTexture){
+				Debug.Log(this.guiText.text);
+				yield return StartCoroutine(ShapewaysConnection.Instance.setTexture("http://static1.sw-cdn.net/rrstatic/img/materials/swatch-coral-red.jpg"));
+			}
+				
+			
 	    }
+		
+		yield return new WaitForSeconds(0);
 
 	}
 }
