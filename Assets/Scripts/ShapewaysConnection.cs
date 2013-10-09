@@ -15,7 +15,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	private string modelUrl = "http://api.shapeways.com/models/v1";
 	
 	public GameObject ring;
-	public GUIText materialID;
+	public GUIText nameMaterial;
 	public GUIText priceMaterial;
 	public GUIText currency;
 	public GUIText quotePrice;
@@ -64,15 +64,22 @@ public class ShapewaysConnection : MonoBehaviour {
 		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
 			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
+			float i = 0f;
+			
 			foreach(IDictionary price in prices.Values){
+				
+				GUIText cloneMaterial;
 				
 				IDictionary material = (IDictionary)materials[price["materialId"]];
 				
+				cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
+					
 				quotePrice.gameObject.SetActive(false);
-				materialID.text = material["title"].ToString();
+				cloneMaterial.text = material["title"].ToString();
 				priceMaterial.text = price["price"].ToString();
 				currency.text = price["currency"].ToString();
 				
+				i-=0.1f;
 				yield return setTexture(material["swatch"].ToString());
 			}
 			
