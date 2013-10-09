@@ -65,6 +65,7 @@ public class ShapewaysConnection : MonoBehaviour {
 			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
 			foreach(IDictionary price in prices.Values){
+				
 				IDictionary material = (IDictionary)materials[price["materialId"]];
 				
 				quotePrice.gameObject.SetActive(false);
