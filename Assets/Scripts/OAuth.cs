@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine;
 public class OAuth{
 	
 	private static string unreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";

@@ -56,11 +56,8 @@ public class ShapewaysConnection : MonoBehaviour {
 		    HTTP.Response response = request.response;
 			HTTP.Response materialsResponse = materialsRequest.response;
 			
-			Debug.Log(materialsResponse.Text);
-			
 		    IDictionary pricesJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
 			IDictionary prices = (IDictionary)pricesJson["prices"];
-
 		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
 			IDictionary materials = (IDictionary)materialsJson["materials"];
 			
@@ -92,21 +89,17 @@ public class ShapewaysConnection : MonoBehaviour {
 		textureRequest.Send();
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (textureRequest.exception != null) {
+		if (textureRequest.exception != null)
 			Debug.LogError (textureRequest.exception);
-		} 
 		else{
 			Texture2D tex = new Texture2D (512, 512);
 			tex.LoadImage (textureRequest.response.Bytes);
 			ring.renderer.material.SetTexture ("_MainTex", tex);
 		}
-
 	}
 	
 	IEnumerator uploadFile(){
-	    FileStream fs = new FileStream("Assets/Models/ring.stl", 
-	                                   FileMode.Open, 
-	                                   FileAccess.Read);
+	    FileStream fs = new FileStream("Assets/Models/ring.stl", FileMode.Open, FileAccess.Read);
 	    byte[] filebytes = new byte[fs.Length];
 	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
 	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
@@ -129,15 +122,14 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (modelRequest.exception != null) {
-			Debug.LogError (modelRequest.exception);
-		} else {
+		if (modelRequest.exception != null)
+			Debug.LogError (modelRequest.exception); 
+		else
 			Debug.Log(modelRequest.response.Text);
-		}
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
-		string oauth_signature = OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret);	
+		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
 		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
