@@ -72,7 +72,7 @@ public class ShapewaysConnection : MonoBehaviour {
 				priceMaterial.text = price["price"].ToString();
 				currency.text = price["currency"].ToString();
 				
-				yield return setTexture(material["swatch"].ToString());
+				yield return StartCoroutine(setTexture(material["swatch"].ToString()));
 			}
 			
 			//yield return StartCoroutine("uploadFile");
