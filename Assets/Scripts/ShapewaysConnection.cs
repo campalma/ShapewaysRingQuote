@@ -22,6 +22,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GUIText currency;
 	public GUIText quotePrice;
 	
+	
 	private static ShapewaysConnection m_instance;
 	
 	public static ShapewaysConnection Instance
