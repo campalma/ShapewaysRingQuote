@@ -19,6 +19,27 @@ public class MeshVolume : MonoBehaviour {
 		
 	}
 	
+	void OnGUI() {
+		
+      	if (GUI.RepeatButton(new Rect(520, 40, 50, 30), "<"))
+             transform.localScale += new Vector3(0.01f, 0, 0);
+		
+		else if(GUI.RepeatButton(new Rect(580, 40, 50, 30), ">"))
+			transform.localScale -= new Vector3(0.01f, 0, 0);
+		
+		else if(GUI.RepeatButton(new Rect(700, 150, 30, 50), "^"))
+			transform.localScale += new Vector3(0, 0.01f, 0);
+		
+		else if(GUI.RepeatButton(new Rect(700, 220, 30, 50), "v"))
+        	transform.localScale -= new Vector3(0, 0.01f, 0);
+		
+		else if(GUI.RepeatButton(new Rect(500, 220, 30, 50),"+"))
+			transform.localScale += new Vector3(0, 0, 0.01f);
+		
+		else if(GUI.RepeatButton(new Rect(550, 220, 30, 50),"-"))
+			transform.localScale -= new Vector3(0, 0, 0.01f);
+    }
+	
 	void GetVolume()
 	{
 		Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
