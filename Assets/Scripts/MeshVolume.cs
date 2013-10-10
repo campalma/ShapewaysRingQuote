@@ -6,7 +6,8 @@ public class MeshVolume : MonoBehaviour {
 
     void Start()
     {
-        //GetVolume();
+        
+		
     }
 
 	void Update()
@@ -18,6 +19,7 @@ public class MeshVolume : MonoBehaviour {
 	{
 		
 	}
+	
 	
 	void OnGUI() {
 		
