@@ -22,6 +22,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GUIText currency;
 	public GUIText quotePrice;
 	
+	public string modelId;
+	public IDictionary modelJson;
 	
 	private static ShapewaysConnection m_instance;
 	
@@ -46,84 +48,40 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	IEnumerator Start (){
 		
-		Dictionary<string, string> dimensions = new Dictionary<string, string>();
-		dimensions.Add("volume","0.000001");
-		dimensions.Add("area","0.0006");
-		dimensions.Add("xBoundMax","0.01");
-		dimensions.Add("yBoundMax","0.01");
-		dimensions.Add("zBoundMax","0.01");
-		dimensions.Add("xBoundMin","0");
-		dimensions.Add("yBoundMin","0");
-		dimensions.Add("zBoundMin","0");
-		
-		string data = MiniJSON.Json.Serialize(dimensions);
-		
-		//Prices request
-		HTTP.Request request = new HTTP.Request("POST", priceUrl, OAuth.GetBytes(data));
-		Dictionary<string,string> parameters = OAuth.generateParams(consumerKey, accessToken);
-		addHeaders(request, parameters, priceUrl);
-		request.Send();
-		
-		//Materials request
-		HTTP.Request materialsRequest = new HTTP.Request("GET", materialsUrl);
-		Dictionary<string,string> materialsParameters = OAuth.generateParams(consumerKey, accessToken);
-		addHeaders(materialsRequest, materialsParameters, materialsUrl);
-		materialsRequest.Send();
-		
-		while(!request.isDone || !materialsRequest.isDone) yield return new WaitForSeconds (1);
-		
-		if(request.exception != null || materialsRequest.exception != null){
-		    Debug.LogError(request.exception);
-			Debug.LogError(materialsRequest.exception);
-		}
-		else {
-		    HTTP.Response response = request.response;
-			HTTP.Response materialsResponse = materialsRequest.response;
-			
-		    IDictionary pricesJson = (IDictionary)MiniJSON.Json.Deserialize(response.Text);
-			IDictionary prices = (IDictionary)pricesJson["prices"];
-		    IDictionary materialsJson = (IDictionary)MiniJSON.Json.Deserialize(materialsResponse.Text);
-			IDictionary materials = (IDictionary)materialsJson["materials"];
-			
-			float i = 0f;
-			
-			
-			foreach(IDictionary price in prices.Values){
-				
-				GUIText cloneMaterial;
-				GUIText clonePrice;
-				GUIText cloneCurrency;
-				GUIText cloneBuy;
-				
-								
-				IDictionary material = (IDictionary)materials[price["materialId"]];
-				
-				cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
-				clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
-				cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
-				cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
-				
-				quotePrice.gameObject.SetActive(false);
-				
-				cloneMaterial.text = material["title"].ToString();
-				clonePrice.text = price["price"].ToString();
-				cloneCurrency.text = price["currency"].ToString();
-				
-				cloneMaterial.transform.parent = this.transform;
-				clonePrice.transform.parent = this.transform; 
-				cloneCurrency.transform.parent = this.transform;  
-				cloneBuy.transform.parent = this.transform;
-				 
+		yield return StartCoroutine("uploadFile");
+		yield return new WaitForSeconds (15);
+		yield return StartCoroutine("getModel", modelId);
 
-				
-				i-=0.1f;
-
-				//yield return StartCoroutine(setTexture(material["swatch"].ToString()));
-				//yield return new WaitForSeconds(1);
-
-			}
+		IDictionary materials = (IDictionary)modelJson["materials"];
 			
-			//yield return StartCoroutine("uploadFile");
+		float i = 0f;
+			
+		foreach(IDictionary material in materials.Values){
+			
+			GUIText cloneMaterial;
+			GUIText clonePrice;
+			GUIText cloneCurrency;
+			GUIText cloneBuy;
+			
+			
+			cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
+			clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
+			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
+			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
+			
+			quotePrice.gameObject.SetActive(false);
+			
+			cloneMaterial.text = material["name"].ToString();
+			clonePrice.text = material["price"].ToString();
+			cloneCurrency.text = "USD";
+			
+			cloneMaterial.transform.parent = this.transform;
+			clonePrice.transform.parent = this.transform; 
+			cloneCurrency.transform.parent = this.transform;  
+			cloneBuy.transform.parent = this.transform;
+			 
+			i-=0.1f;
+
 		}
 	}
 	
@@ -149,6 +107,56 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
+	IEnumerator uploadFile(){
+		
+	    FileStream fs = new FileStream("Assets/Models/ring.stl", FileMode.Open, FileAccess.Read);
+	    byte[] filebytes = new byte[fs.Length];
+	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
+	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
+	    string enc = encodedData; 
+		string urlenc = WWW.EscapeURL(enc);
+		
+		Dictionary<string, string> modelParams = new Dictionary<string, string>();
+		modelParams.Add("file",urlenc);
+		modelParams.Add("fileName","ring2.stl");
+		modelParams.Add("hasRightsToModel","1");
+		modelParams.Add("acceptTermsAndConditions","1");
+		
+		string modelData = MiniJSON.Json.Serialize(modelParams);
+		
+		//Model request
+		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
+		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
+		addHeaders(modelRequest, modelParameters, modelUrl);
+		modelRequest.Send();		
+		
+		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (modelRequest.exception != null)
+			Debug.LogError (modelRequest.exception); 
+		else{
+			IDictionary fileJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text);
+			modelId = fileJson["modelId"].ToString();
+		}
+		
+	}
+	
+	IEnumerator getModel(){
+		//Model request
+		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
+		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);
+		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
+		addHeaders(modelRequest, modelParameters, getModelUrl);
+		modelRequest.Send();
+		
+		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (modelRequest.exception != null)
+			Debug.LogError (modelRequest.exception); 
+		else{
+			modelJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text); 
+		}
+	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
 		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret));	
