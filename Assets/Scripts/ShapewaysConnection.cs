@@ -5,15 +5,7 @@ using System.IO;
 using System;
 
 public class ShapewaysConnection : MonoBehaviour {
-	
-	private string consumerKeySecret = "0b03d1f56ce2a508c4e4c7ce782053a83ba2d9fd";
-	private string accessTokenSecret = "e318690113a78d21dae51ea450e53937db2b11b3";
-	private string accessToken = "94653a7fca7bd364ceaab208fec101c02edcb39f";
-	private string consumerKey = "337ce2c12f95b8a7cece0dbed0c59907a4b13a63";
-	private string priceUrl = "http://api.shapeways.com/price/v1";
-	private string materialsUrl = "http://api.shapeways.com/materials/v1";
-	private string modelUrl = "http://api.shapeways.com/models/v1";
-	
+		
 	public GameObject ring;
 	
 	public GUIText buy;
@@ -49,7 +41,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	IEnumerator Start (){
 		
 		yield return StartCoroutine("uploadFile");
-		yield return new WaitForSeconds (15);
+		yield return new WaitForSeconds (5);
 		yield return StartCoroutine("getModel", modelId);
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
@@ -125,9 +117,9 @@ public class ShapewaysConnection : MonoBehaviour {
 		string modelData = MiniJSON.Json.Serialize(modelParams);
 		
 		//Model request
-		HTTP.Request modelRequest = new HTTP.Request("POST", modelUrl, OAuth.GetBytes(modelData));
-		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
-		addHeaders(modelRequest, modelParameters, modelUrl);
+		HTTP.Request modelRequest = new HTTP.Request("POST", ShapewaysKeys.modelUrl, OAuth.GetBytes(modelData));
+		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
+		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl);
 		modelRequest.Send();		
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
@@ -145,7 +137,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		//Model request
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
 		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);
-		Dictionary<string,string> modelParameters = OAuth.generateParams(consumerKey, accessToken);
+		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
 		addHeaders(modelRequest, modelParameters, getModelUrl);
 		modelRequest.Send();
 		
@@ -159,9 +151,9 @@ public class ShapewaysConnection : MonoBehaviour {
 	}
 	
 	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
-		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerKeySecret, accessTokenSecret));	
+		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
-		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
+		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+ShapewaysKeys.accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
 	}
 }

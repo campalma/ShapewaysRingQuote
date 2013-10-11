@@ -8,11 +8,13 @@ using System;
 public class ConfirmBuy : MonoBehaviour {
 	
 	// Use this for initialization
-	void Start () {
-		//yield return StartCoroutine("addToCart");
+	IEnumerator Start () {
+		yield return StartCoroutine("addToCart");
 	}
 	
-	void addToCart(){
+	IEnumerator addToCart(){
+		Debug.Log("addToCart");
+		yield return new WaitForSeconds(0);
 		/*/Add to cart request
 		string addCartUrl = "http://api.shapeways.com/cart/v1";
 		Dictionary<string,string> cartParams = new Dictionary<string, string>();
