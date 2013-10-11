@@ -9,6 +9,7 @@ public class ConfirmBuy : MonoBehaviour {
 	
 	private string stringToEdit = "Hello World";
 	private bool press = false;
+	private string userAccessToken;
 	
 	// Use this for initialization
 	IEnumerator Start () {
@@ -17,8 +18,7 @@ public class ConfirmBuy : MonoBehaviour {
 			//Request Token
 			Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, "");
 			authParameters.Add("oauth_signature", OAuth.generateSignature(ShapewaysKeys.requestTokenUrl, "GET", authParameters, ShapewaysKeys.consumerKeySecret, ""));
-			HTTP.Request tokenRequest = new HTTP.Request("GET", ShapewaysKeys.requestTokenUrl+ToQueryString(authParameters));
-			Debug.Log(ShapewaysKeys.requestTokenUrl+ToQueryString(authParameters));
+			HTTP.Request tokenRequest = new HTTP.Request("GET", ShapewaysKeys.requestTokenUrl+OAuth.ToQueryString(authParameters));
 			tokenRequest.Send();
 			
 			while(!tokenRequest.isDone) yield return new WaitForEndOfFrame();
@@ -30,29 +30,36 @@ public class ConfirmBuy : MonoBehaviour {
 				int index = response.IndexOf('=');
 				string url = response.Substring(index + 1);
 				string decodedUrl = Uri.UnescapeDataString(url);
+				
+				int tokenIndex = decodedUrl.IndexOf("?oauth_token=");
+				int tokenIndexEnd = decodedUrl.IndexOf('&');
+				AccessTokenRequest.userAccessToken = decodedUrl.Substring(tokenIndex + 13, tokenIndexEnd-tokenIndex-13);
+				
+				tokenIndex = decodedUrl.IndexOf("oauth_token_secret=");
+				tokenIndexEnd = decodedUrl.IndexOf("&oauth_callback");
+				AccessTokenRequest.userAccessTokenSecret = decodedUrl.Substring(tokenIndex + 19, tokenIndexEnd-tokenIndex-19);
 				Application.OpenURL(decodedUrl);
 			}
-			
-			 
-			
 		}
 		else{
 			userAccessToken = PlayerPrefs.GetString("accessToken");
 			userAccessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
 			Debug.Log("Tokens saved before");
+			yield return StartCoroutine("addToCart");
 		}
-		//yield return StartCoroutine("addToCart");
+		
 	}
 	
 	void OnGUI() {
 		
         stringToEdit = GUI.TextField(new Rect(10, 10, 200, 20), stringToEdit, 25);
 		if(Event.current.keyCode == KeyCode.Return && !press){
-				
 			press = true;
-			Debug.Log(stringToEdit);
+			AccessTokenRequest.verifier = stringToEdit;
+			GameObject accessTokenContainerObject =  GameObject.Find("AccessTokenRequestContainer");
+			Transform accessTokenObject = accessTokenContainerObject.gameObject.transform.FindChild("AccessTokenRequest");
+			accessTokenObject.active = true;
 		}
-		
 	}
 	
 	IEnumerator addToCart(){
@@ -64,8 +71,14 @@ public class ConfirmBuy : MonoBehaviour {
 		string cartData = MiniJSON.Json.Serialize(cartParams);
 		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
 		
-		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
+		string accessToken = PlayerPrefs.GetString("accessToken");
+		string accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
+		
+		Debug.Log(accessToken);
+		Debug.Log(accessTokenSecret);
+		
+		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
+		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
 		cartRequest.Send();
 		
 		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
@@ -75,14 +88,6 @@ public class ConfirmBuy : MonoBehaviour {
 		else{
 			Debug.Log(cartRequest.response.Text); 
 		}
-	}
-	
-	private string ToQueryString(Dictionary<string, string> parameters){
-		List<string> a = new List<string>();
-		foreach(KeyValuePair<string, string> pair in parameters){			
-			a.Add(pair.Key+"="+OAuth.urlEncode(pair.Value));
-		}
-	    return "?" + string.Join("&", a.ToArray());
 	}
 	
 }

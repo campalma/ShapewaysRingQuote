@@ -39,9 +39,9 @@ public class ShapewaysConnection : MonoBehaviour {
 	}
 	
 	IEnumerator Start (){
-		
+		//PlayerPrefs.DeleteAll();
 		yield return StartCoroutine("uploadFile");
-		yield return new WaitForSeconds (15);
+		yield return new WaitForSeconds (3);
 		yield return StartCoroutine("getModel", modelId);
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
