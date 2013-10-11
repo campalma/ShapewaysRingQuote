@@ -119,7 +119,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		//Model request
 		HTTP.Request modelRequest = new HTTP.Request("POST", ShapewaysKeys.modelUrl, OAuth.GetBytes(modelData));
 		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl);
+		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
 		modelRequest.Send();		
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
@@ -138,7 +138,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
 		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);
 		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		addHeaders(modelRequest, modelParameters, getModelUrl);
+		addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
 		modelRequest.Send();
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
@@ -150,8 +150,8 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
-	public static void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
-		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret));	
+	public static void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url, string consumerSecret, string tokenSecret){
+		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerSecret, tokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
 		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+ShapewaysKeys.accessToken+"\", oauth_signature=\""+oauth_signature+"\"");

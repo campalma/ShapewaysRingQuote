@@ -10,4 +10,5 @@ public class ShapewaysKeys{
 	public const string materialsUrl = "http://api.shapeways.com/materials/v1";
 	public const string modelUrl = "http://api.shapeways.com/models/v1";
 	public const string addCartUrl = "http://api.shapeways.com/cart/v1";
+	public const string requestTokenUrl = "http://api.shapeways.com/oauth1/request_token/v1";
 }
