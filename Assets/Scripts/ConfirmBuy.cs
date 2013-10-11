@@ -8,6 +8,7 @@ using System;
 public class ConfirmBuy : MonoBehaviour {
 	
 	private string stringToEdit = "Hello World";
+	private bool press = false;
 	
 	// Use this for initialization
 	IEnumerator Start () {
@@ -46,8 +47,9 @@ public class ConfirmBuy : MonoBehaviour {
 	void OnGUI() {
 		
         stringToEdit = GUI.TextField(new Rect(10, 10, 200, 20), stringToEdit, 25);
-		if(Event.current.keyCode == KeyCode.Return){
+		if(Event.current.keyCode == KeyCode.Return && !press){
 				
+			press = true;
 			Debug.Log(stringToEdit);
 		}
 		
