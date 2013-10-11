@@ -7,6 +7,8 @@ using System;
 // Add to cart goes here
 public class ConfirmBuy : MonoBehaviour {
 	
+	private string stringToEdit = "Hello World";
+	
 	// Use this for initialization
 	IEnumerator Start () {
 		string userAccessToken, userAccessTokenSecret;
@@ -30,7 +32,8 @@ public class ConfirmBuy : MonoBehaviour {
 				Application.OpenURL(decodedUrl);
 			}
 			
-			//Request Access Token
+			 
+			
 		}
 		else{
 			userAccessToken = PlayerPrefs.GetString("accessToken");
@@ -38,6 +41,16 @@ public class ConfirmBuy : MonoBehaviour {
 			Debug.Log("Tokens saved before");
 		}
 		//yield return StartCoroutine("addToCart");
+	}
+	
+	void OnGUI() {
+		
+        stringToEdit = GUI.TextField(new Rect(10, 10, 200, 20), stringToEdit, 25);
+		if(Event.current.keyCode == KeyCode.Return){
+				
+			Debug.Log(stringToEdit);
+		}
+		
 	}
 	
 	IEnumerator addToCart(){
