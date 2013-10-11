@@ -25,6 +25,7 @@ public class OAuth{
 		string result = method+"&"+urlEncode(url)+"&";
 		KeyedHashAlgorithm hmac = new HMACSHA1 (GetBytes (signingKey));
 		result = ToBase64 (hmac.ComputeHash (GetBytes (result+urlEncode(urlParams))));
+		Debug.Log(result+urlEncode(urlParams));
 		return result;
 	}
 	
