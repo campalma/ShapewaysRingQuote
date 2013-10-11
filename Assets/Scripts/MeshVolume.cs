@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MeshVolume : MonoBehaviour {
 
-
+	
     void Start()
     {
         
@@ -40,6 +40,7 @@ public class MeshVolume : MonoBehaviour {
 		
 		else if(GUI.RepeatButton(new Rect(550, 220, 30, 50),"-"))
 			transform.localScale -= new Vector3(0, 0, 0.01f);
+			
     }
 	
 	void GetVolume()
