@@ -88,8 +88,28 @@ using System.IO;
 using System.Text;
 
 
-public class STL
+public class STL:MonoBehaviour
 {
+	public GameObject model;
+	private MeshFilter mesh = null;
+	
+	void Start()
+	{
+		
+		model = GameObject.Find("Cylinder");
+		mesh = model.GetComponent<MeshFilter>();
+		
+		//ExportBinary(mesh);
+	}
+	
+	void OnGUI()
+	{
+		if(GUI.Button(new Rect(550, 300, 30, 50),"exporter")){
+			ExportBinary(mesh);
+			Debug.Log(mesh.ToString());
+		}
+			
+	}
 	
 	public static string ExportBinary( MeshFilter filter )
 	{
@@ -99,7 +119,8 @@ public class STL
 	
 	public static string ExportBinary( MeshFilter[] filters )
 	{
-		string filePath = ExportPath() + "/" + Application.loadedLevelName + " " + DateTimeCode() + ".stl";
+		//string filePath = ExportPath() + "/" + Application.loadedLevelName + " " + DateTimeCode() + ".stl";
+		string filePath = ExportPath() + "/" + "model" + ".stl";
 		ExportBinary( filters, filePath );
 		return filePath;
 	}
@@ -108,11 +129,16 @@ public class STL
 	public static void ExportBinary( MeshFilter filter, string filePath )
 	{
 		ExportBinary( new MeshFilter[]{ filter } );
+		Debug.Log("Export Binary");
 	}
 	
 	
 	public static void ExportBinary( MeshFilter[] filters, string filePath )
 	{
+		Debug.Log("Export Binary BIG");
+		Debug.Log(filters.ToString());
+		Debug.Log(filePath.ToString());
+		
 		try
 		{
 			using( BinaryWriter writer = new BinaryWriter( File.Open( filePath, FileMode.Create ) ) )
@@ -190,8 +216,10 @@ public class STL
 	
 	public static string ExportText( MeshFilter[] filters )
 	{
-		string filePath = ExportPath() + "/" + Application.loadedLevelName + " " + DateTimeCode() + ".stl";
-		ExportText( filters, filePath );
+		//string filePath = ExportPath() + "/" + Application.loadedLevelName + " " + DateTimeCode() + ".stl";
+		string filePath = ExportPath() + "/" + "model" + ".stl";
+		ExportText( filters, filePath ); 
+		Debug.Log(filePath);
 		return filePath;
 	}
 	
@@ -279,7 +307,7 @@ public class STL
 	{
 		string exportPath = "";
 		if( Application.platform == RuntimePlatform.OSXEditor ){
-			exportPath = System.Environment.GetEnvironmentVariable( "HOME" ) + "/Desktop";
+			exportPath = System.Environment.GetEnvironmentVariable( "HOME" ) + "/UnityShapeways/Assets/Models";
 		} else {
 			exportPath = System.Environment.GetFolderPath( System.Environment.SpecialFolder.Desktop );
 		}

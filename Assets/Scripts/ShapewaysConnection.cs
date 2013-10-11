@@ -41,7 +41,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	IEnumerator Start (){
 		
 		yield return StartCoroutine("uploadFile");
-		yield return new WaitForSeconds (5);
+		yield return new WaitForSeconds (15);
 		yield return StartCoroutine("getModel", modelId);
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
@@ -101,7 +101,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	IEnumerator uploadFile(){
 		
-	    FileStream fs = new FileStream("Assets/Models/ring.stl", FileMode.Open, FileAccess.Read);
+	    FileStream fs = new FileStream("Assets/Models/model.stl", FileMode.Open, FileAccess.Read);
 	    byte[] filebytes = new byte[fs.Length];
 	    fs.Read(filebytes, 0, Convert.ToInt32(fs.Length));
 	    string encodedData = Convert.ToBase64String(filebytes, Base64FormattingOptions.InsertLineBreaks);
@@ -110,7 +110,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		Dictionary<string, string> modelParams = new Dictionary<string, string>();
 		modelParams.Add("file",urlenc);
-		modelParams.Add("fileName","ring2.stl");
+		modelParams.Add("fileName","model.stl");
 		modelParams.Add("hasRightsToModel","1");
 		modelParams.Add("acceptTermsAndConditions","1");
 		
