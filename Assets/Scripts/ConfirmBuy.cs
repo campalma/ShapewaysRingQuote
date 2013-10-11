@@ -13,19 +13,16 @@ public class ConfirmBuy : MonoBehaviour {
 	}
 	
 	IEnumerator addToCart(){
-		Debug.Log("addToCart");
-		yield return new WaitForSeconds(0);
-		/*/Add to cart request
-		string addCartUrl = "http://api.shapeways.com/cart/v1";
+		//Add to cart request
 		Dictionary<string,string> cartParams = new Dictionary<string, string>();
 		cartParams.Add("modelId", "1406410");
 		cartParams.Add("materialId", "60");
 		cartParams.Add("quantity", "1");
 		string cartData = MiniJSON.Json.Serialize(cartParams);
-		HTTP.Request cartRequest = new HTTP.Request("POST", addCartUrl, OAuth.GetBytes(cartData));
+		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
 		
-		Dictionary<string,string> authParameters = OAuth.generateParams(consumerKey, accessToken);
-		addHeaders(cartRequest, authParameters, addCartUrl);
+		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
+		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl);
 		cartRequest.Send();
 		
 		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
@@ -33,9 +30,8 @@ public class ConfirmBuy : MonoBehaviour {
 		if (cartRequest.exception != null)
 			Debug.LogError (cartRequest.exception); 
 		else{
-			modelJson = (IDictionary)MiniJSON.Json.Deserialize(cartRequest.response.Text); 
+			Debug.Log(cartRequest.response.Text); 
 		}
-		*/
 	}
 
 }

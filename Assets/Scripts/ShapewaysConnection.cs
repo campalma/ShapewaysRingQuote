@@ -150,7 +150,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
-	void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
+	public static void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url){
 		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
