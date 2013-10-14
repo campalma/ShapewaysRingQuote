@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using System.Collections;
 
 public class Hud : MonoBehaviour {
@@ -9,7 +9,7 @@ public class Hud : MonoBehaviour {
 	
 	void OnGUI()
 	{
-		if(GUI.Button(new Rect(550, 400, 60, 40),"exporter")){
+		if(GUI.Button(new Rect(550, 400, 70, 40),"Quote Price")){
 			
 			print ("Box Clicked!");
 			exporter.SetActive(true);
