@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -23,8 +24,14 @@ public class ConfirmBuy : MonoBehaviour {
 			
 			while(!tokenRequest.isDone) yield return new WaitForEndOfFrame();
 			
-			if (tokenRequest.exception != null)
-				Debug.LogError (tokenRequest.exception); 
+			if (tokenRequest.exception != null){
+				
+				//Debug.LogError (tokenRequest.exception);
+				if(EditorUtility.DisplayDialog("Error",tokenRequest.exception.ToString(),"ok"))
+					Application.LoadLevel("CubeScene");
+				
+			}
+				 
 			else{
 				string response = tokenRequest.response.Text;
 				int index = response.IndexOf('=');
@@ -80,8 +87,14 @@ public class ConfirmBuy : MonoBehaviour {
 		
 		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (cartRequest.exception != null)
-			Debug.LogError (cartRequest.exception); 
+		if (cartRequest.exception != null){
+			
+			//Debug.LogError (cartRequest.exception);
+			
+			if(EditorUtility.DisplayDialog("Error",cartRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
+		}
+			 
 		else{
 			Debug.Log(cartRequest.response.Text); 
 		}

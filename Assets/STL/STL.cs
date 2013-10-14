@@ -83,6 +83,7 @@
 
 
 using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.IO;
 using System.Text;
@@ -92,6 +93,8 @@ public class STL:MonoBehaviour
 {
 	public GameObject model;
 	private MeshFilter mesh = null;
+	
+
 	
 	void Start()
 	{
@@ -195,7 +198,12 @@ public class STL:MonoBehaviour
 			}
 		}
 		catch( System.Exception e ){
-			Debug.LogWarning( "FAILED exporting STL object at : " + filePath + "\n" + e );
+			//Debug.LogWarning( "FAILED exporting STL object at : " + filePath + "\n" + e );
+			
+			if(EditorUtility.DisplayDialog("Error","FAILED exporting STL object","ok"))
+				Application.LoadLevel("CubeScene");
+			
+				
 		}
 	}
 	
@@ -290,6 +298,8 @@ public class STL:MonoBehaviour
 		}
 		catch( System.Exception e ){
 			Debug.LogWarning( "FAILED exporting wavefront obj at : " + filePath + "\n" + e );
+			
+			
 		}
 	}
 	

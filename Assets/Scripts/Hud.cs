@@ -13,8 +13,7 @@ public class Hud : MonoBehaviour {
 			
 			print ("Box Clicked!");
 			exporter.SetActive(true);
-			
-			Invoke("Request",5f);
+			Invoke("Request",0f);
 			
 		}
 			
