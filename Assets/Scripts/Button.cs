@@ -5,6 +5,7 @@ public class Button : MonoBehaviour {
 
 	public GameObject buyItem;
 	
+	public string materialId;
 	public bool buyObject = true;
 	public bool setTexture = false;
 	

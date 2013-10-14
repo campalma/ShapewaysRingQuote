@@ -15,34 +15,30 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GameObject quotePrice;
 	
 	public string modelId;
+	public string materialId;
 	public IDictionary modelJson;
 	
 	private static ShapewaysConnection m_instance;
 	
-	public static ShapewaysConnection Instance
-	{
-		get
-		{
+	public static ShapewaysConnection Instance{
+		get{
 			if(m_instance == null)
-			{
 				m_instance = new ShapewaysConnection();
-			}
-			
 			return m_instance;
 		}
 		
 	}
 	
-	void Awake()
-	{
+	void Awake(){
 		m_instance = this;
 	}
 	
 	IEnumerator Start (){
 		//PlayerPrefs.DeleteAll();
-		yield return StartCoroutine("uploadFile");
-		yield return new WaitForSeconds (3);
-		yield return StartCoroutine("getModel", modelId);
+		yield return StartCoroutine("uploadFile", false);
+		//TODO: find a way to know when model price was calculated
+		yield return new WaitForSeconds (15);
+		yield return StartCoroutine("getModel", false);
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
 			
@@ -60,6 +56,7 @@ public class ShapewaysConnection : MonoBehaviour {
 			clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
 			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
 			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
+			cloneMaterial.GetComponent<Button>().materialId = material["materialId"].ToString();
 			
 			quotePrice.SetActive(false);
 			
@@ -98,7 +95,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 	}
 	
-	IEnumerator uploadFile(){
+	public IEnumerator uploadFile(bool addingToCart){
 		
 	    FileStream fs = new FileStream("Assets/Models/model.stl", FileMode.Open, FileAccess.Read);
 	    byte[] filebytes = new byte[fs.Length];
@@ -117,8 +114,20 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		//Model request
 		HTTP.Request modelRequest = new HTTP.Request("POST", ShapewaysKeys.modelUrl, OAuth.GetBytes(modelData));
-		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
+		string accessToken, accessTokenSecret;
+		
+		if(addingToCart){
+			accessToken = PlayerPrefs.GetString("accessToken");
+			accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
+		}
+		else{
+			accessToken = ShapewaysKeys.accessToken;
+			accessTokenSecret = ShapewaysKeys.accessTokenSecret;
+		}
+
+		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
+		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+
 		modelRequest.Send();		
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
@@ -126,18 +135,30 @@ public class ShapewaysConnection : MonoBehaviour {
 		if (modelRequest.exception != null)
 			Debug.LogError (modelRequest.exception); 
 		else{
+			Debug.Log(modelRequest.response.Text);
 			IDictionary fileJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text);
 			modelId = fileJson["modelId"].ToString();
 		}
 		
 	}
 	
-	IEnumerator getModel(){
+	IEnumerator getModel(bool addingToCart){
 		//Model request
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
 		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);
-		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
+		string accessToken, accessTokenSecret;
+		
+		if(addingToCart){
+			accessToken = PlayerPrefs.GetString("accessToken");
+			accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
+		}
+		else{
+			accessToken = ShapewaysKeys.accessToken;
+			accessTokenSecret = ShapewaysKeys.accessTokenSecret;
+		}
+		
+		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
+		addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
 		modelRequest.Send();
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();

@@ -64,9 +64,13 @@ public class ConfirmBuy : MonoBehaviour {
 	
 	IEnumerator addToCart(){
 		//Add to cart request
+		ShapewaysConnection connection = ShapewaysConnection.Instance;
+		yield return StartCoroutine(connection.uploadFile(true));
+		yield return new WaitForSeconds(20);
 		Dictionary<string,string> cartParams = new Dictionary<string, string>();
-		cartParams.Add("modelId", "1406410");
-		cartParams.Add("materialId", "60");
+		
+		cartParams.Add("modelId", connection.modelId);
+		cartParams.Add("materialId", "6");
 		cartParams.Add("quantity", "1");
 		string cartData = MiniJSON.Json.Serialize(cartParams);
 		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
