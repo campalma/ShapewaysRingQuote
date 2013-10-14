@@ -12,7 +12,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	public GUIText nameMaterial;
 	public GUIText priceMaterial;
 	public GUIText currency;
-	public GUIText quotePrice;
+	public GameObject quotePrice;
 	
 	public string modelId;
 	public IDictionary modelJson;
@@ -61,7 +61,7 @@ public class ShapewaysConnection : MonoBehaviour {
 			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
 			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
 			
-			quotePrice.gameObject.SetActive(false);
+			quotePrice.SetActive(false);
 			
 			cloneMaterial.text = material["name"].ToString();
 			clonePrice.text = material["price"].ToString();

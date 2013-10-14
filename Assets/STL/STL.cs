@@ -99,17 +99,9 @@ public class STL:MonoBehaviour
 		model = GameObject.Find("Cylinder");
 		mesh = model.GetComponent<MeshFilter>();
 		
-		//ExportBinary(mesh);
+		ExportBinary(mesh);
 	}
 	
-	void OnGUI()
-	{
-		if(GUI.Button(new Rect(550, 300, 30, 50),"exporter")){
-			ExportBinary(mesh);
-			Debug.Log(mesh.ToString());
-		}
-			
-	}
 	
 	public static string ExportBinary( MeshFilter filter )
 	{
