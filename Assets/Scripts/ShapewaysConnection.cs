@@ -40,7 +40,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		yield return StartCoroutine(uploadFile(false));
 
 		//TODO: find a way to know when model price was calculated
-		//yield return new WaitForSeconds (15);
+		yield return new WaitForSeconds (15);
 		
 		//Get model pricing
 		yield return StartCoroutine(getModel(false));
@@ -206,7 +206,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	public IEnumerator addToCart(string materialId){
 		//Add to cart request
 		yield return StartCoroutine(uploadFile(true));
-		yield return new WaitForSeconds(20);
+		yield return new WaitForSeconds(15);
 		
 		//Add to cart params
 		Dictionary<string,string> cartParams = new Dictionary<string, string>();
