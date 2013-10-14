@@ -74,9 +74,6 @@ public class ConfirmBuy : MonoBehaviour {
 		string accessToken = PlayerPrefs.GetString("accessToken");
 		string accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
 		
-		Debug.Log(accessToken);
-		Debug.Log(accessTokenSecret);
-		
 		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
 		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
 		cartRequest.Send();

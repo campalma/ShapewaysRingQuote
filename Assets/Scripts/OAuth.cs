@@ -21,17 +21,14 @@ public class OAuth{
 	public static string generateSignature(string url, string method, Dictionary<string, string> parameters, string consumerKeySecret, string accessTokenSecret){
 		string urlParams = generateUrlParams(parameters);
 		string signingKey = consumerKeySecret+"&"+accessTokenSecret;
-		Debug.Log(signingKey);
 		
 		string result = method+"&"+urlEncode(url)+"&";
 		KeyedHashAlgorithm hmac = new HMACSHA1 (GetBytes (signingKey));
-		Debug.Log(result+urlEncode(urlParams));
 		result = ToBase64 (hmac.ComputeHash (GetBytes (result+urlEncode(urlParams))));
 		return result;
 	}
 	
 	public static Dictionary<string, string> generateParams(string consumerKey, string accessToken){
-		Debug.Log("HOLA"+accessToken);
 		Dictionary<string, string> parameters = new Dictionary<string, string>();
 		parameters.Add("oauth_consumer_key", consumerKey);
 		parameters.Add("oauth_nonce", OAuth.GenerateNonce());

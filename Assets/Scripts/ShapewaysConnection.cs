@@ -85,7 +85,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 	public IEnumerator setTexture(string textureUrl){
 		//Texture request
-		Debug.Log("URL TEXTURE:"+textureUrl);
 		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
 		textureRequest.Send();
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
@@ -154,6 +153,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerSecret, tokenSecret));	
 		request.SetHeader("Accept", "application/json");
 		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
-		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+ShapewaysKeys.accessToken+"\", oauth_signature=\""+oauth_signature+"\"");
+		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+oauthParams["oauth_token"]+"\", oauth_signature=\""+oauth_signature+"\"");
 	}
 }
