@@ -36,12 +36,17 @@ public class ShapewaysConnection : MonoBehaviour {
 	}
 	
 	IEnumerator Start (){
-		//PlayerPrefs.DeleteAll();
-		yield return StartCoroutine("uploadFile", false);
+		//Upload stl file
+		yield return StartCoroutine(uploadFile(false));
+
 		//TODO: find a way to know when model price was calculated
 		//yield return new WaitForSeconds (15);
-		yield return StartCoroutine("getModel", false);
-		yield return StartCoroutine("getMaterials");
+		
+		//Get model pricing
+		yield return StartCoroutine(getModel(false));
+		
+		//Get materials details
+		yield return StartCoroutine(getMaterials());
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
 			
@@ -54,11 +59,12 @@ public class ShapewaysConnection : MonoBehaviour {
 			GUIText cloneCurrency;
 			GUIText cloneBuy;
 			
-			
 			cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
 			clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
 			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
 			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
+			
+			//Add info to buttons
 			cloneMaterial.GetComponent<Button>().materialId = material["materialId"].ToString();
 			cloneBuy.GetComponent<Button>().materialId = material["materialId"].ToString();
 			
@@ -74,15 +80,8 @@ public class ShapewaysConnection : MonoBehaviour {
 			cloneBuy.transform.parent = this.transform;
 			 
 			i-=0.1f;
-
 		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
 		
 	public IEnumerator setTexture(string textureUrl){
 		//Texture request
@@ -91,9 +90,6 @@ public class ShapewaysConnection : MonoBehaviour {
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
 		
 		if (textureRequest.exception != null){
-			
-			//Debug.LogError (textureRequest.exception);
-			
 			if(EditorUtility.DisplayDialog("Error",textureRequest.exception.ToString(),"ok"))
 				Application.LoadLevel("CubeScene");
 		}
@@ -136,7 +132,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 
 		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
-		addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		OAuth.addHeaders(modelRequest, modelParameters, ShapewaysKeys.modelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
 
 		modelRequest.Send();		
 		
@@ -159,7 +155,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	IEnumerator getMaterials(){
 		HTTP.Request materialsRequest = new HTTP.Request("GET", ShapewaysKeys.materialsUrl);
 		Dictionary<string,string> materialsParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
-		addHeaders(materialsRequest, materialsParameters, ShapewaysKeys.materialsUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
+		OAuth.addHeaders(materialsRequest, materialsParameters, ShapewaysKeys.materialsUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
 		materialsRequest.Send();
 		
 		while(!materialsRequest.isDone) yield return new WaitForEndOfFrame();
@@ -189,7 +185,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 		
 		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
-		addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		OAuth.addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
 		modelRequest.Send();
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
@@ -211,11 +207,13 @@ public class ShapewaysConnection : MonoBehaviour {
 		//Add to cart request
 		yield return StartCoroutine(uploadFile(true));
 		yield return new WaitForSeconds(20);
-		Dictionary<string,string> cartParams = new Dictionary<string, string>();
 		
+		//Add to cart params
+		Dictionary<string,string> cartParams = new Dictionary<string, string>();
 		cartParams.Add("modelId", modelId);
 		cartParams.Add("materialId", materialId);
 		cartParams.Add("quantity", "1");
+		
 		string cartData = MiniJSON.Json.Serialize(cartParams);
 		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
 		
@@ -223,23 +221,20 @@ public class ShapewaysConnection : MonoBehaviour {
 		string accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
 		
 		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
-		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		OAuth.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		
+		Debug.Log("Processing add to cart");
 		cartRequest.Send();
 		
 		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (cartRequest.exception != null)
+		if (cartRequest.exception != null){
+			Debug.Log("Add to cart error");
 			if(EditorUtility.DisplayDialog("Error",cartRequest.exception.ToString(),"ok"))
 				Application.LoadLevel("CubeScene");
+		}
 		else{
 			Debug.Log(cartRequest.response.Text); 
 		}
-	}
-	
-	public static void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url, string consumerSecret, string tokenSecret){
-		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerSecret, tokenSecret));	
-		request.SetHeader("Accept", "application/json");
-		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
-		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+oauthParams["oauth_token"]+"\", oauth_signature=\""+oauth_signature+"\"");
 	}
 }

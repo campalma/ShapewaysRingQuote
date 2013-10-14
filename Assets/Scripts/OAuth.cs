@@ -39,6 +39,13 @@ public class OAuth{
 		return parameters;
 	}
 	
+	public static void addHeaders(HTTP.Request request, Dictionary<string,string> oauthParams, string url, string consumerSecret, string tokenSecret){
+		string oauth_signature = OAuth.urlEncode(OAuth.generateSignature(url, request.method, oauthParams, consumerSecret, tokenSecret));	
+		request.SetHeader("Accept", "application/json");
+		request.SetHeader("Content-type", "application/x-www-form-urlencoded");
+		request.SetHeader("Authorization", "OAuth oauth_consumer_key=\""+ShapewaysKeys.consumerKey+"\", oauth_signature_method=\"HMAC-SHA1\", oauth_nonce=\""+oauthParams["oauth_nonce"]+"\", oauth_timestamp=\""+oauthParams["oauth_timestamp"]+"\", oauth_version=\"1.0\", oauth_token=\""+oauthParams["oauth_token"]+"\", oauth_signature=\""+oauth_signature+"\"");
+	}
+	
 	private static string generateUrlParams(Dictionary<string,string> parameters){
 		string urlParams = "";
 		

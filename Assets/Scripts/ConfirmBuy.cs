@@ -8,7 +8,7 @@ using System;
 // Add to cart goes here
 public class ConfirmBuy : MonoBehaviour {
 	
-	private string stringToEdit = "Hello World";
+	private string stringToEdit = "Write verifier here and press Enter";
 	private bool press = false;
 	public static string materialId;
 	private string userAccessToken;
@@ -27,11 +27,8 @@ public class ConfirmBuy : MonoBehaviour {
 			while(!tokenRequest.isDone) yield return new WaitForEndOfFrame();
 			
 			if (tokenRequest.exception != null){
-				
-				//Debug.LogError (tokenRequest.exception);
 				if(EditorUtility.DisplayDialog("Error",tokenRequest.exception.ToString(),"ok"))
 					Application.LoadLevel("CubeScene");
-				
 			}
 				 
 			else{
