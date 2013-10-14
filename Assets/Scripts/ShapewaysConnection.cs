@@ -9,6 +9,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	public string modelId;
 	public string materialId;
+	public string decodedUrl;
 	public IDictionary modelJson;
 	public IDictionary detailedMaterials;
 	
@@ -26,7 +27,37 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Awake(){
 		m_instance = this;
 	}
+
+	public IEnumerator requestTokenRequest(){
+		//Request Token
+		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, "");
+		authParameters.Add("oauth_signature", OAuth.generateSignature(ShapewaysKeys.requestTokenUrl, "GET", authParameters, ShapewaysKeys.consumerKeySecret, ""));
+		HTTP.Request tokenRequest = new HTTP.Request("GET", ShapewaysKeys.requestTokenUrl+OAuth.ToQueryString(authParameters));
+		tokenRequest.Send();
+		
+		while(!tokenRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (tokenRequest.exception != null){
+			if(EditorUtility.DisplayDialog("Error",tokenRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
+		}
+			 
+		else{
+			string response = tokenRequest.response.Text;
+			int index = response.IndexOf('=');
+			string url = response.Substring(index + 1);
+			decodedUrl = Uri.UnescapeDataString(url);
 			
+			int tokenIndex = decodedUrl.IndexOf("?oauth_token=");
+			int tokenIndexEnd = decodedUrl.IndexOf('&');
+			AccessTokenRequest.userAccessToken = decodedUrl.Substring(tokenIndex + 13, tokenIndexEnd-tokenIndex-13);
+			
+			tokenIndex = decodedUrl.IndexOf("oauth_token_secret=");
+			tokenIndexEnd = decodedUrl.IndexOf("&oauth_callback");
+			AccessTokenRequest.userAccessTokenSecret = decodedUrl.Substring(tokenIndex + 19, tokenIndexEnd-tokenIndex-19);
+		}
+	}
+	
 	public IEnumerator setTexture(GameObject gameObject, string textureUrl){
 		//Texture request
 		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);

@@ -43,11 +43,8 @@ public class AccessTokenRequest : MonoBehaviour {
 			string accessTokenSecret = response.Substring(index + 7);
 			PlayerPrefs.SetString("accessToken", accessToken);
 			PlayerPrefs.SetString("accessTokenSecret", accessTokenSecret);
-			Debug.Log(response);
 			GameObject confirmBuy = GameObject.Find("Buy(Clone)");
-			Debug.Log(confirmBuy);
 			Transform child = confirmBuy.gameObject.transform.FindChild("SendObjet");
-			Debug.Log(child);
 			child.active = false;
 			child.active = true;
 		}
