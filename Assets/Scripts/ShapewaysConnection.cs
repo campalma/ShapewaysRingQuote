@@ -6,14 +6,6 @@ using System.IO;
 using System;
 
 public class ShapewaysConnection : MonoBehaviour {
-		
-	public GameObject ring;
-	
-	public GUIText buy;
-	public GUIText nameMaterial;
-	public GUIText priceMaterial;
-	public GUIText currency;
-	public GameObject quotePrice;
 	
 	public string modelId;
 	public string materialId;
@@ -34,56 +26,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Awake(){
 		m_instance = this;
 	}
-	
-	IEnumerator Start (){
-		//Upload stl file
-		yield return StartCoroutine(uploadFile(false));
-
-		//TODO: find a way to know when model price was calculated
-		yield return new WaitForSeconds (15);
-		
-		//Get model pricing
-		yield return StartCoroutine(getModel(false));
-		
-		//Get materials details
-		yield return StartCoroutine(getMaterials());
-
-		IDictionary materials = (IDictionary)modelJson["materials"];
 			
-		float i = 0f;
-			
-		foreach(IDictionary material in materials.Values){
-			
-			GUIText cloneMaterial;
-			GUIText clonePrice;
-			GUIText cloneCurrency;
-			GUIText cloneBuy;
-			
-			cloneMaterial = Instantiate(nameMaterial,nameMaterial.transform.position + new Vector3(0f,i,0f),nameMaterial.transform.rotation) as GUIText;
-			clonePrice = Instantiate(priceMaterial,priceMaterial.transform.position + new Vector3(0f,i,0f),priceMaterial.transform.rotation) as GUIText;
-			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
-			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
-			
-			//Add info to buttons
-			cloneMaterial.GetComponent<Button>().materialId = material["materialId"].ToString();
-			cloneBuy.GetComponent<Button>().materialId = material["materialId"].ToString();
-			
-			quotePrice.SetActive(false);
-			
-			cloneMaterial.text = material["name"].ToString();
-			clonePrice.text = material["price"].ToString();
-			cloneCurrency.text = "USD";
-			
-			cloneMaterial.transform.parent = this.transform;
-			clonePrice.transform.parent = this.transform; 
-			cloneCurrency.transform.parent = this.transform;  
-			cloneBuy.transform.parent = this.transform;
-			 
-			i-=0.1f;
-		}
-	}
-		
-	public IEnumerator setTexture(string textureUrl){
+	public IEnumerator setTexture(GameObject gameObject, string textureUrl){
 		//Texture request
 		HTTP.Request textureRequest = new HTTP.Request("GET", textureUrl);
 		textureRequest.Send();
@@ -97,7 +41,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		else{
 			Texture2D tex = new Texture2D (512, 512);
 			tex.LoadImage (textureRequest.response.Bytes);
-			ring.renderer.material.SetTexture ("_MainTex", tex);
+			gameObject.renderer.material.SetTexture ("_MainTex", tex);
 		}
 	}
 	
@@ -152,7 +96,7 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 	}
 	
-	IEnumerator getMaterials(){
+	public IEnumerator getMaterials(){
 		HTTP.Request materialsRequest = new HTTP.Request("GET", ShapewaysKeys.materialsUrl);
 		Dictionary<string,string> materialsParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
 		OAuth.addHeaders(materialsRequest, materialsParameters, ShapewaysKeys.materialsUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
@@ -169,7 +113,7 @@ public class ShapewaysConnection : MonoBehaviour {
 
 	}
 	
-	IEnumerator getModel(bool addingToCart){
+	public IEnumerator getModel(bool addingToCart){
 		//Model request
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
 		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);

@@ -4,6 +4,7 @@ using System.Collections;
 public class Button : MonoBehaviour {
 
 	public GameObject buyItem;
+	public GameObject ring;
 	
 	public string materialId;
 	public bool buyObject = true;
@@ -21,7 +22,8 @@ public class Button : MonoBehaviour {
 			}
 			else if(setTexture){
 				string materialUrl = (string)material["swatch"];
-				yield return StartCoroutine(connection.setTexture(materialUrl));
+				ring = GameObject.Find("ring");
+				yield return StartCoroutine(connection.setTexture(ring, materialUrl));
 			}
 				
 			
