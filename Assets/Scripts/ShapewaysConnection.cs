@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -89,8 +90,14 @@ public class ShapewaysConnection : MonoBehaviour {
 		textureRequest.Send();
 		while(!textureRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (textureRequest.exception != null)
-			Debug.LogError (textureRequest.exception);
+		if (textureRequest.exception != null){
+			
+			//Debug.LogError (textureRequest.exception);
+			
+			if(EditorUtility.DisplayDialog("Error",textureRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
+		}
+			
 		else{
 			Texture2D tex = new Texture2D (512, 512);
 			tex.LoadImage (textureRequest.response.Bytes);
@@ -135,8 +142,12 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (modelRequest.exception != null)
-			Debug.LogError (modelRequest.exception); 
+		if (modelRequest.exception != null){
+			
+			//Debug.LogError (); 
+			if(EditorUtility.DisplayDialog("Error",modelRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
+		}
 		else{
 			Debug.Log(modelRequest.response.Text);
 			IDictionary fileJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text);
@@ -183,8 +194,14 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
 		
-		if (modelRequest.exception != null)
-			Debug.LogError (modelRequest.exception); 
+		if (modelRequest.exception != null){
+			
+			//Debug.LogError (modelRequest.exception);
+			if(EditorUtility.DisplayDialog("Error",modelRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
+			
+		}
+			
 		else{
 			modelJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text); 
 		}
@@ -212,7 +229,8 @@ public class ShapewaysConnection : MonoBehaviour {
 		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
 		
 		if (cartRequest.exception != null)
-			Debug.LogError (cartRequest.exception); 
+			if(EditorUtility.DisplayDialog("Error",cartRequest.exception.ToString(),"ok"))
+				Application.LoadLevel("CubeScene");
 		else{
 			Debug.Log(cartRequest.response.Text); 
 		}

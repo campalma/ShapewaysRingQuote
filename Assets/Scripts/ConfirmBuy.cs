@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +26,14 @@ public class ConfirmBuy : MonoBehaviour {
 			
 			while(!tokenRequest.isDone) yield return new WaitForEndOfFrame();
 			
-			if (tokenRequest.exception != null)
-				Debug.LogError (tokenRequest.exception); 
+			if (tokenRequest.exception != null){
+				
+				//Debug.LogError (tokenRequest.exception);
+				if(EditorUtility.DisplayDialog("Error",tokenRequest.exception.ToString(),"ok"))
+					Application.LoadLevel("CubeScene");
+				
+			}
+				 
 			else{
 				string response = tokenRequest.response.Text;
 				int index = response.IndexOf('=');
