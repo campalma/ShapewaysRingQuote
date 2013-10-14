@@ -9,10 +9,12 @@ public class ConfirmBuy : MonoBehaviour {
 	
 	private string stringToEdit = "Hello World";
 	private bool press = false;
+	public static string materialId;
 	private string userAccessToken;
 	
 	// Use this for initialization
 	IEnumerator Start () {
+		Debug.Log(materialId);
 		string userAccessToken, userAccessTokenSecret;
 		if(!PlayerPrefs.HasKey("accessToken") && !PlayerPrefs.HasKey("accessTokenSecret")){
 			//Request Token
@@ -45,11 +47,12 @@ public class ConfirmBuy : MonoBehaviour {
 			userAccessToken = PlayerPrefs.GetString("accessToken");
 			userAccessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
 			Debug.Log("Tokens saved before");
-			yield return StartCoroutine("addToCart");
+			ShapewaysConnection connection = ShapewaysConnection.Instance;
+			yield return StartCoroutine(connection.addToCart(materialId));
 		}
 		
 	}
-	
+		
 	void OnGUI() {
 		
         stringToEdit = GUI.TextField(new Rect(10, 10, 200, 20), stringToEdit, 25);
@@ -59,35 +62,6 @@ public class ConfirmBuy : MonoBehaviour {
 			GameObject accessTokenContainerObject =  GameObject.Find("AccessTokenRequestContainer");
 			Transform accessTokenObject = accessTokenContainerObject.gameObject.transform.FindChild("AccessTokenRequest");
 			accessTokenObject.active = true;
-		}
-	}
-	
-	IEnumerator addToCart(){
-		//Add to cart request
-		ShapewaysConnection connection = ShapewaysConnection.Instance;
-		yield return StartCoroutine(connection.uploadFile(true));
-		yield return new WaitForSeconds(20);
-		Dictionary<string,string> cartParams = new Dictionary<string, string>();
-		
-		cartParams.Add("modelId", connection.modelId);
-		cartParams.Add("materialId", "6");
-		cartParams.Add("quantity", "1");
-		string cartData = MiniJSON.Json.Serialize(cartParams);
-		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
-		
-		string accessToken = PlayerPrefs.GetString("accessToken");
-		string accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
-		
-		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
-		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
-		cartRequest.Send();
-		
-		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
-		
-		if (cartRequest.exception != null)
-			Debug.LogError (cartRequest.exception); 
-		else{
-			Debug.Log(cartRequest.response.Text); 
 		}
 	}
 	

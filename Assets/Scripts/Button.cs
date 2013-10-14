@@ -12,12 +12,16 @@ public class Button : MonoBehaviour {
 	IEnumerator OnMouseDown () {
 
 	    if (Input.GetKey ("mouse 0")) {
+			ShapewaysConnection connection = ShapewaysConnection.Instance;
+			IDictionary material = (IDictionary)connection.detailedMaterials[this.materialId];
 			
-			if(buyObject)
+			if(buyObject){
+				ConfirmBuy.materialId = this.materialId.ToString();
 				buyItem.SetActive(true);
+			}
 			else if(setTexture){
-				Debug.Log(this.guiText.text);
-				yield return StartCoroutine(ShapewaysConnection.Instance.setTexture("http://static1.sw-cdn.net/rrstatic/img/materials/swatch-coral-red.jpg"));
+				string materialUrl = (string)material["swatch"];
+				yield return StartCoroutine(connection.setTexture(materialUrl));
 			}
 				
 			

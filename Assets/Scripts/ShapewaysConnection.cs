@@ -17,6 +17,7 @@ public class ShapewaysConnection : MonoBehaviour {
 	public string modelId;
 	public string materialId;
 	public IDictionary modelJson;
+	public IDictionary detailedMaterials;
 	
 	private static ShapewaysConnection m_instance;
 	
@@ -37,8 +38,9 @@ public class ShapewaysConnection : MonoBehaviour {
 		//PlayerPrefs.DeleteAll();
 		yield return StartCoroutine("uploadFile", false);
 		//TODO: find a way to know when model price was calculated
-		yield return new WaitForSeconds (15);
+		//yield return new WaitForSeconds (15);
 		yield return StartCoroutine("getModel", false);
+		yield return StartCoroutine("getMaterials");
 
 		IDictionary materials = (IDictionary)modelJson["materials"];
 			
@@ -57,6 +59,7 @@ public class ShapewaysConnection : MonoBehaviour {
 			cloneCurrency = Instantiate(currency,currency.transform.position + new Vector3(0f,i,0f),currency.transform.rotation) as GUIText;
 			cloneBuy = Instantiate(buy,buy.transform.position + new Vector3(0f,i,0f),buy.transform.rotation) as GUIText;
 			cloneMaterial.GetComponent<Button>().materialId = material["materialId"].ToString();
+			cloneBuy.GetComponent<Button>().materialId = material["materialId"].ToString();
 			
 			quotePrice.SetActive(false);
 			
@@ -142,6 +145,23 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 	}
 	
+	IEnumerator getMaterials(){
+		HTTP.Request materialsRequest = new HTTP.Request("GET", ShapewaysKeys.materialsUrl);
+		Dictionary<string,string> materialsParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, ShapewaysKeys.accessToken);
+		addHeaders(materialsRequest, materialsParameters, ShapewaysKeys.materialsUrl, ShapewaysKeys.consumerKeySecret, ShapewaysKeys.accessTokenSecret);
+		materialsRequest.Send();
+		
+		while(!materialsRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (materialsRequest.exception != null)
+			Debug.LogError (materialsRequest.exception); 
+		else{
+			IDictionary materialsResponse = (IDictionary) MiniJSON.Json.Deserialize(materialsRequest.response.Text);
+			detailedMaterials = (IDictionary) materialsResponse["materials"];
+		}
+
+	}
+	
 	IEnumerator getModel(bool addingToCart){
 		//Model request
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
@@ -167,6 +187,34 @@ public class ShapewaysConnection : MonoBehaviour {
 			Debug.LogError (modelRequest.exception); 
 		else{
 			modelJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text); 
+		}
+	}
+	
+	public IEnumerator addToCart(string materialId){
+		//Add to cart request
+		yield return StartCoroutine(uploadFile(true));
+		yield return new WaitForSeconds(20);
+		Dictionary<string,string> cartParams = new Dictionary<string, string>();
+		
+		cartParams.Add("modelId", modelId);
+		cartParams.Add("materialId", materialId);
+		cartParams.Add("quantity", "1");
+		string cartData = MiniJSON.Json.Serialize(cartParams);
+		HTTP.Request cartRequest = new HTTP.Request("POST", ShapewaysKeys.addCartUrl, OAuth.GetBytes(cartData));
+		
+		string accessToken = PlayerPrefs.GetString("accessToken");
+		string accessTokenSecret = PlayerPrefs.GetString("accessTokenSecret");
+		
+		Dictionary<string,string> authParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
+		ShapewaysConnection.addHeaders(cartRequest, authParameters, ShapewaysKeys.addCartUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		cartRequest.Send();
+		
+		while(!cartRequest.isDone) yield return new WaitForEndOfFrame();
+		
+		if (cartRequest.exception != null)
+			Debug.LogError (cartRequest.exception); 
+		else{
+			Debug.Log(cartRequest.response.Text); 
 		}
 	}
 	
