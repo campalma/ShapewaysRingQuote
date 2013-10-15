@@ -17,12 +17,9 @@ public class QuoteModel : MonoBehaviour {
 		
 		//Upload stl file
 		yield return StartCoroutine(connection.uploadFile(false));
-
-		//TODO: find a way to know when model price was calculated
-		yield return new WaitForSeconds (15);
 		
 		//Get model pricing
-		yield return StartCoroutine(connection.getModel(false));
+		yield return StartCoroutine(connection.getPrintableModel(false));
 		
 		//Get materials details
 		yield return StartCoroutine(connection.getMaterials());

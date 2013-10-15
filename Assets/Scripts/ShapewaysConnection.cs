@@ -148,7 +148,16 @@ public class ShapewaysConnection : MonoBehaviour {
 	void Update(){
 	}
 	
-	public IEnumerator getModel(bool addingToCart){
+	public IEnumerator getPrintableModel(bool addingToCart){
+		yield return StartCoroutine(getModel(addingToCart));
+		while(modelJson["printable"].ToString() == "processing"){
+			Debug.Log("Waiting 5 seconds");
+			yield return new WaitForSeconds(5);
+			yield return StartCoroutine(getModel(addingToCart));
+		}
+	}
+	
+	private IEnumerator getModel(bool addingToCart){
 		//Model request
 		string getModelUrl = "http://api.shapeways.com/models/"+modelId+"/v1";
 		HTTP.Request modelRequest = new HTTP.Request("GET", getModelUrl);
@@ -165,27 +174,27 @@ public class ShapewaysConnection : MonoBehaviour {
 		
 		Dictionary<string,string> modelParameters = OAuth.generateParams(ShapewaysKeys.consumerKey, accessToken);
 		OAuth.addHeaders(modelRequest, modelParameters, getModelUrl, ShapewaysKeys.consumerKeySecret, accessTokenSecret);
+		
 		modelRequest.Send();
 		
 		while(!modelRequest.isDone) yield return new WaitForEndOfFrame();
 		
 		if (modelRequest.exception != null){
-			
-			//Debug.LogError (modelRequest.exception);
 			if(EditorUtility.DisplayDialog("Error",modelRequest.exception.ToString(),"ok"))
 				Application.LoadLevel("CubeScene");
-			
 		}
 			
 		else{
-			modelJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text); 
+			Debug.Log("GET:");
+			Debug.Log(modelRequest.response.Text);
+			modelJson = (IDictionary)MiniJSON.Json.Deserialize(modelRequest.response.Text);
 		}
 	}
 	
 	public IEnumerator addToCart(string materialId){
 		//Add to cart request
 		yield return StartCoroutine(uploadFile(true));
-		yield return new WaitForSeconds(15);
+		yield return StartCoroutine(getPrintableModel(true));
 		
 		//Add to cart params
 		Dictionary<string,string> cartParams = new Dictionary<string, string>();
