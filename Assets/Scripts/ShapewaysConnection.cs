@@ -17,8 +17,10 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	public static ShapewaysConnection Instance{
 		get{
-			if(m_instance == null)
+			if(m_instance == null){
 				m_instance = new ShapewaysConnection();
+				Debug.Log("new guy");
+			}
 			return m_instance;
 		}
 		
@@ -139,9 +141,13 @@ public class ShapewaysConnection : MonoBehaviour {
 			Debug.LogError (materialsRequest.exception); 
 		else{
 			IDictionary materialsResponse = (IDictionary) MiniJSON.Json.Deserialize(materialsRequest.response.Text);
-			detailedMaterials = (IDictionary) materialsResponse["materials"];
+			this.detailedMaterials = (IDictionary) materialsResponse["materials"];
+
 		}
 
+	}
+	
+	void Update(){
 	}
 	
 	public IEnumerator getModel(bool addingToCart){
