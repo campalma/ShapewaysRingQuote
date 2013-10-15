@@ -17,10 +17,8 @@ public class ShapewaysConnection : MonoBehaviour {
 	
 	public static ShapewaysConnection Instance{
 		get{
-			if(m_instance == null){
+			if(m_instance == null)
 				m_instance = new ShapewaysConnection();
-				Debug.Log("new guy");
-			}
 			return m_instance;
 		}
 		

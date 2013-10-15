@@ -22,7 +22,7 @@ public class Button : MonoBehaviour {
 			}
 			else if(setTexture){
 				string materialUrl = (string)material["swatch"];
-				ring = GameObject.Find("ring");
+				ring = GameObject.Find("Cylinder");
 				yield return StartCoroutine(connection.setTexture(ring, materialUrl));
 			}
 				

@@ -9,7 +9,6 @@ public class QuoteModel : MonoBehaviour {
 	public GUIText currency;
 	
 	public GameObject quotePrice;
-	public GameObject ring;
 	
 	// Use this for initialization
 	IEnumerator Start (){
