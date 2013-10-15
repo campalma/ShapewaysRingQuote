@@ -216,6 +216,8 @@ public class ShapewaysConnection : MonoBehaviour {
 		}
 		else{
 			Debug.Log(cartRequest.response.Text); 
+			EditorUtility.DisplayDialog("Cart","Added to cart successful","ok");
+				
 		}
 	}
 }
